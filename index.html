@@ -2,70 +2,43 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Order Otomatis + Admin (Demo) — Fixed</title>
+    <title>Sistem Order Otomatis + Admin (Demo) — Secure & Modern</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CLEANER & RESPONSIVE STYLES --- */
-        :root{
-            --bg: #f6f8fb;
-            --card: #ffffff;
-            --primary: #2563eb;
-            --muted: #6b7280;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --glass: rgba(255,255,255,0.6);
-            --radius: 12px;
-            --container-width: 920px;
-        }
+        :root{--bg:#f6f8fb;--card:#fff;--primary:#2563eb;--muted:#6b7280;--success:#16a34a;--danger:#dc2626;--radius:12px;--container:980px}
         *{box-sizing:border-box}
-        body{
-            margin:0; padding:28px; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%); color:#0f172a; min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
-        }
-        .container{
-            width:100%; max-width:var(--container-width); background:var(--card); border-radius:16px; padding:22px; box-shadow: 0 10px 30px rgba(15,23,42,0.08);
-        }
-        header{display:flex; gap:16px; align-items:center; justify-content:space-between}
-        h1{font-size:20px; margin:0; color:var(--primary)}
-        .subtitle{color:var(--muted); font-size:13px}
-
-        .columns{display:grid; grid-template-columns: 320px 1fr; gap:18px; margin-top:18px}
-        @media (max-width:880px){ .columns{grid-template-columns:1fr} }
-
-        /* card styles */
-        .card{background: linear-gradient(180deg, rgba(255,255,255,0.8), var(--card)); padding:16px; border-radius:12px; border:1px solid rgba(15,23,42,0.03)}
-        .card h2{margin:0 0 10px 0; font-size:16px}
-
-        label{display:block; font-weight:600; font-size:13px; margin-bottom:6px}
-        input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea, select{
-            width:100%; padding:10px 12px; border-radius:10px; border:1px solid #e6e9ef; outline:none; font-size:14px; background:transparent
-        }
-        textarea{resize:vertical}
-
-        .btn{display:inline-block; padding:10px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:600}
-        .btn.primary{background:var(--primary); color:white}
-        .btn.ghost{background:transparent; border:1px solid rgba(15,23,42,0.06); color:var(--muted)}
-        .btn.warn{background:#f59e0b; color:white}
-        .btn.danger{background:var(--danger); color:white}
+        body{margin:0;padding:28px;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:linear-gradient(180deg,#eef2ff 0%,var(--bg)100%);color:#0f172a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center}
+        .container{width:100%;max-width:var(--container);background:var(--card);border-radius:16px;padding:22px;box-shadow:0 10px 30px rgba(15,23,42,0.08)}
+        header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+        h1{font-size:20px;margin:0;color:var(--primary)}
+        .subtitle{color:var(--muted);font-size:13px}
+        .columns{display:grid;grid-template-columns:360px 1fr;gap:18px;margin-top:18px}
+        @media (max-width:880px){.columns{grid-template-columns:1fr}}
+        .card{background:linear-gradient(180deg,rgba(255,255,255,0.8),var(--card));padding:16px;border-radius:12px;border:1px solid rgba(15,23,42,0.03)}
+        label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
+        input[type="text"],input[type="email"],input[type="password"],input[type="number"],textarea,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e6e9ef;outline:none;font-size:14px;background:transparent}
+        .btn{display:inline-block;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+        .btn.primary{background:var(--primary);color:white}
+        .btn.ghost{background:transparent;border:1px solid rgba(15,23,42,0.06);color:var(--muted)}
+        .btn.danger{background:var(--danger);color:white}
         .btn.full{width:100%}
-
-        .logout-btn{background:transparent; border:1px solid rgba(15,23,42,0.06); color:var(--danger); padding:8px 10px; border-radius:10px}
-
-        .message{padding:10px 12px; border-radius:10px; margin-bottom:12px; display:none}
-        .message.success{background:#ecfdf5; color:#065f46; border:1px solid rgba(16,185,129,0.12)}
-        .message.error{background:#fff1f2; color:#7f1d1d; border:1px solid rgba(220,38,38,0.08)}
-        .message.info{background:#f0f9ff; color:#0369a1; border:1px solid rgba(59,130,246,0.06)}
-
-        .balance{font-size:14px; padding:12px; border-radius:12px; background:linear-gradient(90deg,#f8fafc,#ffffff)}
+        .message{padding:10px 12px;border-radius:10px;margin-bottom:12px;display:none}
+        .message.success{background:#ecfdf5;color:#065f46;border:1px solid rgba(16,185,129,0.12)}
+        .message.error{background:#fff1f2;color:#7f1d1d;border:1px solid rgba(220,38,38,0.08)}
+        .message.info{background:#f0f9ff;color:#0369a1;border:1px solid rgba(59,130,246,0.06)}
+        .balance{font-size:14px;padding:12px;border-radius:12px;background:linear-gradient(90deg,#f8fafc,#ffffff)}
         .product-list{margin-top:12px}
-        .product-item{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border-radius:10px; background:#fbfdff; border:1px solid #eef2ff}
+        .product-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border-radius:10px;background:#fbfdff;border:1px solid #eef2ff}
         .product-info{flex:1}
-        .muted{color:var(--muted); font-size:13px}
-
-        /* admin area tweaks */
-        .admin-badge{display:inline-block; font-weight:700; padding:6px 8px; border-radius:8px; background:#fff7ed; color:#92400e}
-
-        footer{margin-top:16px; font-size:13px; color:var(--muted); text-align:center}
-
+        .muted{color:var(--muted);font-size:13px}
+        .admin-badge{display:inline-block;font-weight:700;padding:6px 8px;border-radius:8px;background:#fff7ed;color:#92400e}
+        .password-toggle{position:relative}
+        .strength{height:8px;border-radius:8px;background:#eee}
+        .strength > i{display:block;height:100%;border-radius:8px;width:0%}
+        .note{font-size:13px;color:var(--muted)}
     </style>
 </head>
 <body>
@@ -73,44 +46,51 @@
         <header>
             <div>
                 <h1>Sistem Order Otomatis + Admin (Demo)</h1>
-                <div class="subtitle">Demo: tidak terhubung ke backend nyata — semua data disimpan di <code>localStorage</code>.</div>
+                <div class="subtitle">Versi: Secure & Modern — Client-only demo</div>
             </div>
             <div id="header-actions"></div>
         </header>
 
         <div class="columns">
-            <!-- LEFT: AUTH / ADMIN -->
             <div>
                 <div id="login-card" class="card" aria-live="polite">
                     <h2>Login / Register</h2>
-
                     <div id="login-message" class="message error" role="status"></div>
                     <form id="login-form">
                         <label for="login-email">Email / Username</label>
                         <input type="text" id="login-email" placeholder="User: test@mail.com | Admin: admin" required>
 
                         <label for="login-password">Password</label>
-                        <input type="password" id="login-password" placeholder="User: 123 | Admin: admins5" required>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <input type="password" id="login-password" placeholder="••••••" required>
+                            <button type="button" id="toggle-login-pass" class="btn ghost">Tampil</button>
+                        </div>
 
-                        <div style="display:flex; gap:8px; margin-top:10px">
+                        <div style="display:flex;gap:8px;margin-top:10px">
                             <button type="submit" class="btn primary">Login</button>
                             <button type="button" id="show-register" class="btn ghost">Register</button>
                         </div>
                     </form>
 
-                    <hr style="margin:12px 0; border:none; height:1px; background:#f1f5f9">
+                    <hr style="margin:12px 0;border:none;height:1px;background:#f1f5f9">
 
                     <div id="register-area" style="display:none">
-                        <h2 style="font-size:15px; margin-bottom:8px">Register Pengguna</h2>
+                        <h2 style="font-size:15px;margin-bottom:8px">Register Pengguna</h2>
                         <div id="register-message" class="message error"></div>
                         <form id="register-form">
                             <label for="reg-email">Email (unik)</label>
                             <input type="email" id="reg-email" required>
 
                             <label for="reg-password">Password</label>
-                            <input type="password" id="reg-password" required>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input type="password" id="reg-password" required>
+                                <button type="button" id="toggle-reg-pass" class="btn ghost">Tampil</button>
+                            </div>
 
-                            <div style="display:flex; gap:8px; margin-top:10px">
+                            <label class="note">Kekuatan password</label>
+                            <div class="strength" style="margin-bottom:10px"><i id="strength-bar"></i></div>
+
+                            <div style="display:flex;gap:8px;margin-top:10px">
                                 <button type="submit" class="btn primary">Register</button>
                                 <button type="button" id="cancel-register" class="btn ghost">Batal</button>
                             </div>
@@ -118,12 +98,12 @@
                     </div>
                 </div>
 
-                <div id="admin-card" class="card" style="margin-top:12px; display:none">
+                <div id="admin-card" class="card" style="margin-top:12px;display:none">
                     <h2>Admin Dashboard</h2>
                     <div class="admin-badge">ADMIN</div>
                     <div id="admin-message" class="message error" style="margin-top:10px"></div>
 
-                    <h3 style="margin-top:12px; font-size:14px">Tambah Produk</h3>
+                    <h3 style="margin-top:12px;font-size:14px">Tambah Produk</h3>
                     <form id="add-product-form">
                         <label for="product-name">Nama Produk</label>
                         <input type="text" id="product-name" required>
@@ -144,46 +124,48 @@
 
                     <h3 style="margin-top:12px">Daftar Produk</h3>
                     <div id="product-list-admin" class="product-list"></div>
+
+                    <hr style="margin:12px 0;border:none;height:1px;background:#f1f5f9">
+                    <button id="change-admin-pass" class="btn ghost">Ganti Password Admin</button>
                 </div>
 
             </div>
 
-            <!-- RIGHT: DASHBOARD USER -->
             <div>
                 <div id="dashboard" class="card" style="display:none">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
                         <div>
                             <div class="balance">Halo, <strong id="welcome-user"></strong></div>
                             <div class="muted" style="margin-top:6px">Saldo: <strong id="current-balance">Rp 0</strong></div>
                         </div>
-                        <div style="display:flex; gap:8px; align-items:center">
+                        <div style="display:flex;gap:8px;align-items:center">
                             <button id="logout-btn" class="btn ghost">Logout</button>
                         </div>
                     </div>
 
                     <div style="margin-top:14px">
                         <div id="topup-section">
-                            <h2 style="font-size:15px; margin-bottom:8px">Top Up Saldo</h2>
+                            <h2 style="font-size:15px;margin-bottom:8px">Top Up Saldo</h2>
                             <div id="topup-message" class="message info"></div>
-                            <form id="topup-form" style="display:flex; gap:8px; align-items:center">
+                            <form id="topup-form" style="display:flex;gap:8px;align-items:center">
                                 <input type="number" id="topup-amount" min="10000" placeholder="Jumlah (min 10000)" style="flex:1">
                                 <button type="submit" class="btn primary">Request</button>
                             </form>
                         </div>
 
-                        <hr style="margin:16px 0; border:none; height:1px; background:#f1f5f9">
+                        <hr style="margin:16px 0;border:none;height:1px;background:#f1f5f9">
 
                         <div id="order-section">
-                            <h2 style="font-size:15px; margin-bottom:8px">Buat Order Otomatis</h2>
+                            <h2 style="font-size:15px;margin-bottom:8px">Buat Order Otomatis</h2>
                             <div id="order-message" class="message error"></div>
 
                             <div id="product-list-user" class="product-list"></div>
 
-                            <div id="order-form-area" style="display:none; margin-top:10px">
+                            <div id="order-form-area" style="display:none;margin-top:10px">
                                 <form id="order-form">
                                     <label for="link">Link Target</label>
                                     <input type="text" id="link" placeholder="Masukkan link target" required>
-                                    <div style="display:flex; gap:8px; margin-top:8px">
+                                    <div style="display:flex;gap:8px;margin-top:8px">
                                         <button type="submit" class="btn primary full">Proses Order</button>
                                     </div>
                                 </form>
@@ -193,52 +175,53 @@
                 </div>
 
                 <div id="public-note" class="card" style="margin-top:12px">
-                    <h2 style="font-size:15px">Catatan</h2>
-                    <p class="muted" style="margin:0">Demo ini menyimpan data di penyimpanan browser (localStorage). Untuk deployment nyata, sambungkan ke backend & database, jangan simpan password di frontend.</p>
+                    <h2 style="font-size:15px">Catatan Keamanan</h2>
+                    <p class="muted" style="margin:0">Demo ini menggunakan keamanan client-side: <strong>hash password</strong> sebelum disimpan, validasi input, dan Content-Security-Policy. Untuk produksi, simpan data di server, gunakan HTTPS, server-side hashing, dan autentikasi aman (JWT/session).</p>
                 </div>
             </div>
         </div>
 
-        <footer>
-            &copy; Demo Sistem Order • Built for you
-        </footer>
+        <footer style="margin-top:16px;font-size:13px;color:var(--muted);text-align:center">&copy; Demo Sistem Order • Secure Demo</footer>
     </div>
 
+    <!-- bcryptjs untuk hashing password (client-side demo only) -->
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
     <script>
         // --- CONFIG ---
         const MIN_DEPOSIT = 10000;
-        const ADMIN_USERNAME = 'admin';
-        const ADMIN_PASSWORD = 'admins5'; // diubah jadi admins5
+        const DEFAULT_ADMIN = { username: 'admin', passwordHash: null };
 
-        const AUTSC_API_KEY = 'b67ff890-491c-4732-9ed4-453514fcccaa';
-        const AUTSC_DEPOSIT_URL = 'https://my-payment.autsc.my.id/api/deposit';
-
-        // --- HELPERS ---
-        function show(el) { el.style.display = ''; }
-        function hide(el) { el.style.display = 'none'; }
-        function q(id){ return document.getElementById(id); }
-
-        function showMessage(id, text, type='info', timeout=5000){
-            const el = q(id);
-            if(!el) return;
-            el.className = 'message ' + (type==='success'?'success':(type==='error'?'error':'info'));
-            el.innerText = text;
-            show(el);
-            if(timeout>0){ setTimeout(()=>{ hide(el); }, timeout); }
+        // --- UTIL ---
+        const q = id => document.getElementById(id);
+        function show(el){ if(!el) return; el.style.display = ''; }
+        function hide(el){ if(!el) return; el.style.display = 'none'; }
+        function sanitize(str){ // basic sanitizer to avoid stored HTML
+            return String(str).replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":"&#39;"}[c]; });
         }
+        function showMessage(id,text,type='info',timeout=5000){const el=q(id);if(!el) return; el.className='message '+(type==='success'?'success':(type==='error'?'error':'info')); el.innerText=text; show(el); if(timeout>0) setTimeout(()=>hide(el),timeout);} 
+        function formatRupiah(number){ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(number); }
 
-        function formatRupiah(number){
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
-        }
-
-        function loadUser(){
-            const raw = localStorage.getItem('currentUser');
-            return raw ? JSON.parse(raw) : null;
-        }
-        function saveUser(user){ localStorage.setItem('currentUser', JSON.stringify(user)); updateDashboardDisplay(user); }
-
+        // --- STORAGE HELPERS ---
         function getAllProducts(){ return JSON.parse(localStorage.getItem('products') || '[]'); }
         function saveAllProducts(list){ localStorage.setItem('products', JSON.stringify(list)); }
+
+        // users stored as array of { email, username, passwordHash, balance }
+        function getUsers(){ return JSON.parse(localStorage.getItem('users') || '[]'); }
+        function saveUsers(arr){ localStorage.setItem('users', JSON.stringify(arr)); }
+
+        // seed admin (hashed password) on first load
+        (function seedAdmin(){
+            const users = getUsers();
+            const adminExists = users.some(u=>u.username===DEFAULT_ADMIN.username && u.role==='admin');
+            if(!adminExists){
+                // default admin password: admins5 (but store hash)
+                const salt = bcrypt.genSaltSync(10);
+                const hash = bcrypt.hashSync('admins5', salt);
+                users.push({ username:DEFAULT_ADMIN.username, email:'admin@local', passwordHash:hash, balance:0, role:'admin' });
+                saveUsers(users);
+                console.info('Admin account created (demo). Username: admin, password: admins5');
+            }
+        })();
 
         // init sample products
         if(!localStorage.getItem('products')){
@@ -258,6 +241,14 @@
         const productListUser = q('product-list-user');
         const orderFormArea = q('order-form-area');
 
+        // toggle password visibility
+        q('toggle-login-pass').addEventListener('click', ()=>{ const p=q('login-password'); p.type = p.type==='password'? 'text':'password'; });
+        q('toggle-reg-pass').addEventListener('click', ()=>{ const p=q('reg-password'); p.type = p.type==='password'? 'text':'password'; });
+
+        // password strength meter (simple)
+        q('reg-password').addEventListener('input', function(){ const v=this.value; const score = calcPasswordScore(v); const bar = q('strength-bar'); bar.style.width = Math.min(100,score*20)+'%'; bar.style.background = score>=4? '#16a34a' : score>=2? '#f59e0b' : '#ef4444'; });
+        function calcPasswordScore(p){ let score=0; if(p.length>=8) score++; if(/[A-Z]/.test(p)) score++; if(/[0-9]/.test(p)) score++; if(/[^A-Za-z0-9]/.test(p)) score++; return score; }
+
         // toggle register
         showRegisterBtn.addEventListener('click', ()=>{ show(registerArea); showMessage('register-message','Isi form registrasi di bawah','info'); });
         cancelRegisterBtn.addEventListener('click', ()=>{ hide(registerArea); });
@@ -265,184 +256,74 @@
         // LOGIN
         loginForm.addEventListener('submit', function(e){
             e.preventDefault();
-            const identifier = q('login-email').value.trim();
+            const identifier = sanitize(q('login-email').value.trim());
             const password = q('login-password').value;
 
-            // admin check
-            if(identifier === ADMIN_USERNAME && password === ADMIN_PASSWORD){
-                const adminUser = { username: ADMIN_USERNAME, isLoggedIn:true, role:'admin' };
-                saveUser(adminUser);
-                showMessage('login-message','Login admin berhasil','success');
-                renderState();
-                return;
+            const users = getUsers();
+            const user = users.find(u => (u.email===identifier || u.username===identifier));
+            if(user && user.passwordHash && bcrypt.compareSync(password, user.passwordHash)){
+                // store session in sessionStorage (not localStorage)
+                sessionStorage.setItem('currentUser', JSON.stringify({ username:user.username, email:user.email, role:user.role }));
+                showMessage('login-message','Login berhasil','success'); renderState(); return;
             }
-
-            // user check: in this demo we only keep one user in currentUser (simple)
-            const storedUser = loadUser();
-            if(storedUser && (storedUser.email === identifier || storedUser.username === identifier) && storedUser.password === password){
-                storedUser.isLoggedIn = true; storedUser.role='user'; saveUser(storedUser);
-                showMessage('login-message','Login pengguna berhasil','success');
-                renderState();
-                return;
-            }
-
             showMessage('login-message','Email/Username atau password salah','error');
         });
 
-        // REGISTER
+        // REGISTER (hash pw before storing)
         registerForm.addEventListener('submit', function(e){
             e.preventDefault();
-            const email = q('reg-email').value.trim();
+            const email = sanitize(q('reg-email').value.trim());
             const password = q('reg-password').value;
             if(!email || !password){ showMessage('register-message','Lengkapi form registrasi','error'); return; }
+            const users = getUsers();
+            if(users.some(u=>u.email===email)){ showMessage('register-message','Email sudah terdaftar','error'); return; }
 
-            const newUser = { email, password, balance:0, isLoggedIn:false, role:'user', username: email.split('@')[0] };
-            // Simpan sebagai currentUser (demo). Untuk multi-user, gunakan array di localStorage.
-            saveUser(newUser);
-            showMessage('register-message','Registrasi berhasil! Silakan login.', 'success');
-            hide(registerArea);
+            const salt = bcrypt.genSaltSync(10);
+            const hash = bcrypt.hashSync(password, salt);
+            const username = email.split('@')[0];
+            users.push({ username, email, passwordHash:hash, balance:0, role:'user' });
+            saveUsers(users);
+            showMessage('register-message','Registrasi berhasil! Silakan login.', 'success'); hide(registerArea); registerForm.reset();
         });
 
         // LOGOUT
-        q('logout-btn').addEventListener('click', function(){
-            const u = loadUser(); if(u){ u.isLoggedIn = false; saveUser(u); }
-            showMessage('login-message','Logout berhasil','info'); renderState();
-        });
+        q('logout-btn').addEventListener('click', function(){ sessionStorage.removeItem('currentUser'); showMessage('login-message','Logout berhasil','info'); renderState(); });
 
         // ADD PRODUCT (ADMIN)
-        q('add-product-form').addEventListener('submit', function(e){
-            e.preventDefault();
-            const name = q('product-name').value.trim();
-            const price = parseInt(q('product-price').value) || 0;
-            const stock = parseInt(q('product-stock').value) || 0;
-            const description = q('product-desc').value.trim();
-            if(!name || price<=0 || stock<=0){ showMessage('admin-message','Lengkapi data produk','error'); return; }
-
-            const products = getAllProducts();
-            const newId = products.length>0 ? Math.max(...products.map(p=>p.id))+1 : 1;
-            products.push({ id:newId, name, price, stock, description });
-            saveAllProducts(products);
-            showMessage('admin-message', `Produk '${name}' berhasil ditambahkan`, 'success');
-            q('add-product-form').reset(); renderProductListAdmin(); renderProductListUser();
-        });
+        q('add-product-form').addEventListener('submit', function(e){ e.preventDefault(); const name=sanitize(q('product-name').value.trim()); const price=parseInt(q('product-price').value)||0; const stock=parseInt(q('product-stock').value)||0; const description=sanitize(q('product-desc').value.trim()); if(!name||price<=0||stock<=0){ showMessage('admin-message','Lengkapi data produk','error'); return; } const products=getAllProducts(); const newId = products.length>0? Math.max(...products.map(p=>p.id))+1:1; products.push({ id:newId, name, price, stock, description }); saveAllProducts(products); showMessage('admin-message', `Produk '${name}' berhasil ditambahkan`, 'success'); q('add-product-form').reset(); renderProductListAdmin(); renderProductListUser(); });
 
         // RENDER admin product list
-        function renderProductListAdmin(){
-            const products = getAllProducts();
-            productListAdmin.innerHTML = '';
-            if(products.length===0){ productListAdmin.innerHTML = '<p class="muted">Belum ada produk.</p>'; return; }
-            products.forEach(p=>{
-                const wrap = document.createElement('div'); wrap.className = 'product-item';
-                wrap.innerHTML = `
-                    <div class="product-info">
-                        <strong>${p.name}</strong>
-                        <div class="muted">Harga: ${formatRupiah(p.price)} • Stok: ${p.stock}</div>
-                        <div class="muted" style="margin-top:6px">${p.description}</div>
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center">
-                        <button class="btn ghost" onclick="editProduct(${p.id})">Edit</button>
-                        <button class="btn danger" onclick="deleteProduct(${p.id})">Hapus</button>
-                    </div>
-                `;
-                productListAdmin.appendChild(wrap);
-            });
-        }
+        function renderProductListAdmin(){ const products=getAllProducts(); productListAdmin.innerHTML=''; if(products.length===0){ productListAdmin.innerHTML='<p class="muted">Belum ada produk.</p>'; return; } products.forEach(p=>{ const wrap=document.createElement('div'); wrap.className='product-item'; wrap.innerHTML = ` <div class="product-info"><strong>${sanitize(p.name)}</strong><div class="muted">Harga: ${formatRupiah(p.price)} • Stok: ${p.stock}</div><div class="muted" style="margin-top:6px">${sanitize(p.description)}</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn ghost" onclick="editProduct(${p.id})">Edit</button><button class="btn danger" onclick="deleteProduct(${p.id})">Hapus</button></div>`; productListAdmin.appendChild(wrap); }); }
 
         // RENDER user product list
-        function renderProductListUser(){
-            const products = getAllProducts();
-            productListUser.innerHTML = '';
-            if(products.length===0){ productListUser.innerHTML = '<p class="muted">Belum ada produk tersedia.</p>'; return; }
-            products.forEach(p=>{
-                const wrap = document.createElement('div'); wrap.className = 'product-item';
-                wrap.innerHTML = `
-                    <div class="product-info">
-                        <strong>${p.name}</strong>
-                        <div class="muted">Harga: ${formatRupiah(p.price)} • Stok: ${p.stock}</div>
-                        <div class="muted" style="margin-top:6px">${p.description}</div>
-                    </div>
-                    <div style="display:flex; gap:6px; align-items:center">
-                        <button class="btn primary" ${p.stock<=0?'disabled':''} onclick="startOrder(${p.id})">Beli</button>
-                    </div>
-                `;
-                productListUser.appendChild(wrap);
-            });
-        }
+        function renderProductListUser(){ const products=getAllProducts(); productListUser.innerHTML=''; if(products.length===0){ productListUser.innerHTML='<p class="muted">Belum ada produk tersedia.</p>'; return; } products.forEach(p=>{ const wrap=document.createElement('div'); wrap.className='product-item'; wrap.innerHTML = `<div class="product-info"><strong>${sanitize(p.name)}</strong><div class="muted">Harga: ${formatRupiah(p.price)} • Stok: ${p.stock}</div><div class="muted" style="margin-top:6px">${sanitize(p.description)}</div></div><div style="display:flex;gap:6px;align-items:center"><button class="btn primary" ${p.stock<=0?'disabled':''} onclick="startOrder(${p.id})">Beli</button></div>`; productListUser.appendChild(wrap); }); }
 
         // delete product (admin)
         window.deleteProduct = function(id){ if(!confirm('Hapus produk ini?')) return; let products = getAllProducts(); products = products.filter(p=>p.id!==id); saveAllProducts(products); showMessage('admin-message','Produk dihapus','success'); renderProductListAdmin(); renderProductListUser(); }
 
         // edit product (simple inline prompt)
-        window.editProduct = function(id){ const products = getAllProducts(); const p = products.find(x=>x.id===id); if(!p) return; const name = prompt('Nama produk', p.name); if(name===null) return; const price = parseInt(prompt('Harga', p.price)); if(isNaN(price)) return; const stock = parseInt(prompt('Stok', p.stock)); if(isNaN(stock)) return; p.name=name; p.price=price; p.stock=stock; saveAllProducts(products); renderProductListAdmin(); renderProductListUser(); showMessage('admin-message','Produk diperbarui','success'); }
+        window.editProduct = function(id){ const products=getAllProducts(); const p=products.find(x=>x.id===id); if(!p) return; const name=prompt('Nama produk', p.name); if(name===null) return; const price=parseInt(prompt('Harga', p.price)); if(isNaN(price)) return; const stock=parseInt(prompt('Stok', p.stock)); if(isNaN(stock)) return; p.name=sanitize(name); p.price=price; p.stock=stock; saveAllProducts(products); renderProductListAdmin(); renderProductListUser(); showMessage('admin-message','Produk diperbarui','success'); }
 
         // ORDER flow
         let currentOrderProduct = null;
-        window.startOrder = function(productId){
-            const user = loadUser(); if(!user || !user.isLoggedIn || user.role==='admin'){ showMessage('order-message','Anda harus login sebagai pengguna untuk melakukan order','error'); return; }
-            const products = getAllProducts(); const p = products.find(x=>x.id===productId); if(!p){ showMessage('order-message','Produk tidak ditemukan','error'); return; }
-            if(p.stock<=0){ showMessage('order-message','Stok habis','error'); return; }
-            currentOrderProduct = p;
-            orderFormArea.style.display = '';
-            q('link').value = '';
-            showMessage('order-message', `Menyiapkan order: ${p.name} — Harga ${formatRupiah(p.price)}`, 'info');
-        }
+        window.startOrder = function(productId){ const session = sessionStorage.getItem('currentUser'); if(!session){ showMessage('order-message','Anda harus login sebagai pengguna untuk melakukan order','error'); return; } const user = JSON.parse(session); if(user.role==='admin'){ showMessage('order-message','Login dengan akun pengguna untuk order','error'); return; } const products = getAllProducts(); const p = products.find(x=>x.id===productId); if(!p){ showMessage('order-message','Produk tidak ditemukan','error'); return; } if(p.stock<=0){ showMessage('order-message','Stok habis','error'); return; } currentOrderProduct = p; orderFormArea.style.display=''; q('link').value=''; showMessage('order-message', `Menyiapkan order: ${p.name} — Harga ${formatRupiah(p.price)}`, 'info'); }
 
-        q('order-form').addEventListener('submit', function(e){
-            e.preventDefault();
-            const user = loadUser(); if(!user || !user.isLoggedIn || user.role==='admin'){ showMessage('order-message','Anda harus login sebagai pengguna', 'error'); return; }
-            if(!currentOrderProduct){ showMessage('order-message','Pilih produk terlebih dahulu', 'error'); return; }
-            const link = q('link').value.trim(); if(!link){ showMessage('order-message','Masukkan link target', 'error'); return; }
-
-            const products = getAllProducts(); const prod = products.find(x=>x.id===currentOrderProduct.id);
-            if(!prod || prod.stock<=0){ showMessage('order-message','Stok tidak tersedia', 'error'); return; }
-            if(user.balance < prod.price){ showMessage('order-message', `Saldo kurang. Butuh ${formatRupiah(prod.price)}.`, 'error'); return; }
-
-            // proses (simulasi)
-            user.balance -= prod.price; prod.stock -= 1; saveUser(user); saveAllProducts(products);
-            showMessage('order-message', `✅ ORDER SUKSES! ${prod.name} • Saldo terpotong ${formatRupiah(prod.price)}`, 'success');
-            currentOrderProduct = null; orderFormArea.style.display = 'none'; renderProductListUser(); renderProductListAdmin();
-        });
+        q('order-form').addEventListener('submit', function(e){ e.preventDefault(); const session = sessionStorage.getItem('currentUser'); if(!session){ showMessage('order-message','Anda harus login sebagai pengguna','error'); return; } const userObj = JSON.parse(session); if(!currentOrderProduct){ showMessage('order-message','Pilih produk terlebih dahulu','error'); return; } const link = sanitize(q('link').value.trim()); if(!link){ showMessage('order-message','Masukkan link target','error'); return; } let users = getUsers(); const user = users.find(u=>u.username===userObj.username); if(!user){ showMessage('order-message','Akun pengguna tidak ditemukan','error'); return; } const products = getAllProducts(); const prod = products.find(x=>x.id===currentOrderProduct.id); if(!prod||prod.stock<=0){ showMessage('order-message','Stok tidak tersedia','error'); return; } if(user.balance < prod.price){ showMessage('order-message', `Saldo kurang. Butuh ${formatRupiah(prod.price)}.`, 'error'); return; } user.balance -= prod.price; prod.stock -= 1; saveUsers(users); saveAllProducts(products); showMessage('order-message', `✅ ORDER SUKSES! ${prod.name} • Saldo terpotong ${formatRupiah(prod.price)}`, 'success'); currentOrderProduct=null; orderFormArea.style.display='none'; renderProductListUser(); renderProductListAdmin(); });
 
         // TOPUP flow (simulasi)
-        q('topup-form').addEventListener('submit', async function(e){
-            e.preventDefault(); const amount = parseInt(q('topup-amount').value) || 0; const user = loadUser(); if(!user){ showMessage('topup-message','Anda harus login', 'error'); return; }
-            if(amount < MIN_DEPOSIT){ showMessage('topup-message', `Minimal ${formatRupiah(MIN_DEPOSIT)}`, 'error'); return; }
-            showMessage('topup-message', 'Membuat permintaan deposit (simulasi)...', 'info');
-            // simulate external payment
-            setTimeout(()=>{
-                if(confirm(`SIMULASI: Bayar ${formatRupiah(amount)} sekarang? Klik OK untuk sukses.`)){
-                    user.balance += amount; saveUser(user); showMessage('topup-message', `Topup sukses: ${formatRupiah(amount)}`, 'success');
-                } else {
-                    showMessage('topup-message','Pembayaran belum terdeteksi', 'error');
-                }
-            }, 1200);
-        });
+        q('topup-form').addEventListener('submit', async function(e){ e.preventDefault(); const amount=parseInt(q('topup-amount').value)||0; const session = sessionStorage.getItem('currentUser'); if(!session){ showMessage('topup-message','Anda harus login','error'); return; } if(amount < MIN_DEPOSIT){ showMessage('topup-message', `Minimal ${formatRupiah(MIN_DEPOSIT)}`, 'error'); return; } showMessage('topup-message','Membuat permintaan deposit (simulasi)...','info'); setTimeout(()=>{ if(confirm(`SIMULASI: Bayar ${formatRupiah(amount)} sekarang? Klik OK untuk sukses.`)){ let users=getUsers(); const current=JSON.parse(session); const user = users.find(u=>u.username===current.username); if(user){ user.balance = (user.balance||0) + amount; saveUsers(users); showMessage('topup-message', `Topup sukses: ${formatRupiah(amount)}`, 'success'); } } else { showMessage('topup-message','Pembayaran belum terdeteksi','error'); } },1200); });
+
+        // change admin password (admin-only)
+        q('change-admin-pass').addEventListener('click', function(){ const session = sessionStorage.getItem('currentUser'); if(!session){ showMessage('admin-message','Login sebagai admin untuk akses ini','error'); return; } const current=JSON.parse(session); if(current.role!=='admin'){ showMessage('admin-message','Akses hanya untuk admin','error'); return; } const old = prompt('Masukkan password admin saat ini'); if(old===null) return; const users=getUsers(); const admin = users.find(u=>u.role==='admin'); if(!admin || !bcrypt.compareSync(old, admin.passwordHash)){ alert('Password lama salah'); return; } const nw = prompt('Masukkan password baru (min 6 char)'); if(!nw || nw.length<6){ alert('Password harus >=6 karakter'); return; } const salt = bcrypt.genSaltSync(10); admin.passwordHash = bcrypt.hashSync(nw, salt); saveUsers(users); alert('Password admin berhasil diubah'); });
 
         // state render
-        function renderState(){
-            const u = loadUser();
-            if(u && u.isLoggedIn){
-                if(u.role==='admin'){
-                    show(adminCard); hide(q('login-card')); hide(dashboard); showMessage('login-message','Anda sebagai admin', 'info', 2000);
-                } else {
-                    show(dashboard); hide(q('login-card')); hide(adminCard);
-                    q('welcome-user').innerText = u.username || u.email;
-                    q('current-balance').innerText = formatRupiah(u.balance || 0);
-                }
-            } else {
-                hide(adminCard); hide(dashboard); show(q('login-card'));
-            }
-            renderProductListAdmin(); renderProductListUser();
-        }
-
-        function updateDashboardDisplay(user){ if(!user) return; q('welcome-user').innerText = user.username || user.email; q('current-balance').innerText = formatRupiah(user.balance || 0); }
+        function renderState(){ const session = sessionStorage.getItem('currentUser'); if(session){ const u = JSON.parse(session); if(u.role==='admin'){ show(adminCard); hide(q('login-card')); hide(dashboard); showMessage('login-message','Anda sebagai admin','info',2000); } else { show(dashboard); hide(q('login-card')); hide(adminCard); q('welcome-user').innerText = u.username || u.email; const users = getUsers(); const user = users.find(x=>x.username===u.username); q('current-balance').innerText = formatRupiah(user?user.balance:0); } } else { hide(adminCard); hide(dashboard); show(q('login-card')); } renderProductListAdmin(); renderProductListUser(); }
 
         // initial
         renderState();
 
-        // expose some functions for console/debug
+        // expose demo helper
         window.startDemoAdmin = function(){ q('login-email').value='admin'; q('login-password').value='admins5'; loginForm.dispatchEvent(new Event('submit')) }
-
     </script>
 </body>
 </html>
