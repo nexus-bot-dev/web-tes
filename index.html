@@ -3,601 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Order Otomatis + Admin (Demo)</title>
+    <title>Sistem Order Otomatis + Admin (Demo) — Fixed</title>
     <style>
-        /* --- CSS STYLES --- */
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+        /* --- CLEANER & RESPONSIVE STYLES --- */
+        :root{
+            --bg: #f6f8fb;
+            --card: #ffffff;
+            --primary: #2563eb;
+            --muted: #6b7280;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --glass: rgba(255,255,255,0.6);
+            --radius: 12px;
+            --container-width: 920px;
         }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 700px; /* Lebih lebar untuk admin */
+        *{box-sizing:border-box}
+        body{
+            margin:0; padding:28px; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%); color:#0f172a; min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
         }
-        h1 {
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 20px;
+        .container{
+            width:100%; max-width:var(--container-width); background:var(--card); border-radius:16px; padding:22px; box-shadow: 0 10px 30px rgba(15,23,42,0.08);
         }
-        h2 {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
-            margin-top: 20px;
+        header{display:flex; gap:16px; align-items:center; justify-content:space-between}
+        h1{font-size:20px; margin:0; color:var(--primary)}
+        .subtitle{color:var(--muted); font-size:13px}
+
+        .columns{display:grid; grid-template-columns: 320px 1fr; gap:18px; margin-top:18px}
+        @media (max-width:880px){ .columns{grid-template-columns:1fr} }
+
+        /* card styles */
+        .card{background: linear-gradient(180deg, rgba(255,255,255,0.8), var(--card)); padding:16px; border-radius:12px; border:1px solid rgba(15,23,42,0.03)}
+        .card h2{margin:0 0 10px 0; font-size:16px}
+
+        label{display:block; font-weight:600; font-size:13px; margin-bottom:6px}
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea, select{
+            width:100%; padding:10px 12px; border-radius:10px; border:1px solid #e6e9ef; outline:none; font-size:14px; background:transparent
         }
-        .message {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            display: none;
-            font-weight: bold;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
-            margin-top: 5px;
-        }
-        button.full-width {
-            width: 100%;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .logout-btn {
-            float: right;
-            background-color: #dc3545;
-        }
-        .logout-btn:hover {
-            background-color: #c82333;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-        }
-        .balance {
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            font-weight: bold;
-            text-align: center;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .product-list {
-            margin-top: 20px;
-        }
-        .product-item {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            background-color: #fafafa;
-        }
-        .product-item strong {
-            color: #28a745;
-        }
-        
+        textarea{resize:vertical}
+
+        .btn{display:inline-block; padding:10px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:600}
+        .btn.primary{background:var(--primary); color:white}
+        .btn.ghost{background:transparent; border:1px solid rgba(15,23,42,0.06); color:var(--muted)}
+        .btn.warn{background:#f59e0b; color:white}
+        .btn.danger{background:var(--danger); color:white}
+        .btn.full{width:100%}
+
+        .logout-btn{background:transparent; border:1px solid rgba(15,23,42,0.06); color:var(--danger); padding:8px 10px; border-radius:10px}
+
+        .message{padding:10px 12px; border-radius:10px; margin-bottom:12px; display:none}
+        .message.success{background:#ecfdf5; color:#065f46; border:1px solid rgba(16,185,129,0.12)}
+        .message.error{background:#fff1f2; color:#7f1d1d; border:1px solid rgba(220,38,38,0.08)}
+        .message.info{background:#f0f9ff; color:#0369a1; border:1px solid rgba(59,130,246,0.06)}
+
+        .balance{font-size:14px; padding:12px; border-radius:12px; background:linear-gradient(90deg,#f8fafc,#ffffff)}
+        .product-list{margin-top:12px}
+        .product-item{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border-radius:10px; background:#fbfdff; border:1px solid #eef2ff}
+        .product-info{flex:1}
+        .muted{color:var(--muted); font-size:13px}
+
+        /* admin area tweaks */
+        .admin-badge{display:inline-block; font-weight:700; padding:6px 8px; border-radius:8px; background:#fff7ed; color:#92400e}
+
+        footer{margin-top:16px; font-size:13px; color:var(--muted); text-align:center}
+
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h1>Sistem Order & Top Up Otomatis</h1>
-        
-        <div id="app-area">
-            
-            <div id="login-page">
-                <h2>Login Pengguna</h2>
-                <div id="login-message" class="message error"></div>
-                <form id="login-form">
-                    <label for="login-email">Email/Username:</label>
-                    <input type="text" id="login-email" required placeholder="User: test@mail.com | Admin: admin">
-                    
-                    <label for="login-password">Password:</label>
-                    <input type="password" id="login-password" required placeholder="User: 123 | Admin: admins6">
-                    
-                    <button type="submit" class="full-width">Login</button>
-                    <a href="#" onclick="showPage('register')">Belum punya akun? Register</a>
-                </form>
+        <header>
+            <div>
+                <h1>Sistem Order Otomatis + Admin (Demo)</h1>
+                <div class="subtitle">Demo: tidak terhubung ke backend nyata — semua data disimpan di <code>localStorage</code>.</div>
             </div>
-            
-            <div id="register-page" class="hidden">
-                <h2>Register Pengguna</h2>
-                <div id="register-message" class="message error"></div>
-                <form id="register-form">
-                    <label for="reg-email">Email (gunakan email unik):</label>
-                    <input type="email" id="reg-email" required>
-                    
-                    <label for="reg-password">Password:</label>
-                    <input type="password" id="reg-password" required>
-                    
-                    <button type="submit" class="full-width">Register</button>
-                    <a href="#" onclick="showPage('login')">Sudah punya akun? Login</a>
-                </form>
-            </div>
-            
-            <div id="dashboard-page" class="hidden">
-                <div class="balance">
-                    Halo, <span id="welcome-user"></span>! Saldo Anda: <span id="current-balance">Rp 0</span>
-                    <button class="logout-btn" onclick="logout()">Logout</button>
-                </div>
-                
-                <button onclick="showDashboardSection('topup')" id="btn-topup">Top Up Saldo</button>
-                <button onclick="showDashboardSection('order')" id="btn-order">Buat Order</button>
+            <div id="header-actions"></div>
+        </header>
 
-                <hr style="margin: 15px 0;">
+        <div class="columns">
+            <!-- LEFT: AUTH / ADMIN -->
+            <div>
+                <div id="login-card" class="card" aria-live="polite">
+                    <h2>Login / Register</h2>
 
-                <div id="topup-section">
-                    <h2>Top Up Saldo</h2>
-                    <div id="topup-message" class="message success"></div>
-                    <form id="topup-form">
-                        <label for="topup-amount">Jumlah Deposit (min 10000):</label>
-                        <input type="number" id="topup-amount" min="10000" required>
-                        <button type="submit" class="full-width">Request Pembayaran</button>
+                    <div id="login-message" class="message error" role="status"></div>
+                    <form id="login-form">
+                        <label for="login-email">Email / Username</label>
+                        <input type="text" id="login-email" placeholder="User: test@mail.com | Admin: admin" required>
+
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="User: 123 | Admin: admins5" required>
+
+                        <div style="display:flex; gap:8px; margin-top:10px">
+                            <button type="submit" class="btn primary">Login</button>
+                            <button type="button" id="show-register" class="btn ghost">Register</button>
+                        </div>
                     </form>
-                </div>
-                
-                <div id="order-section" class="hidden">
-                    <h2>Buat Order Otomatis</h2>
-                    <div id="order-message" class="message error"></div>
-                    <form id="order-form">
-                        <label for="order-product">Pilih Produk:</label>
-                        <select id="order-product" required>
-                            </select>
-                        <div id="selected-product-info"></div>
-                        
-                        <label for="link">Link Target:</label>
-                        <input type="text" id="link" required>
-                        
-                        <button type="submit" class="full-width">Proses Order</button>
-                    </form>
-                </div>
-            </div>
-            
-            <div id="admin-page" class="hidden">
-                <div class="balance" style="background-color: #ffc107;">
-                    ADMIN DASHBOARD <button class="logout-btn" onclick="logout()">Logout</button>
-                </div>
 
-                <h2>Tambah Produk Baru</h2>
-                <div id="admin-message" class="message error"></div>
-                <form id="add-product-form">
-                    <label for="product-name">Nama Produk:</label>
-                    <input type="text" id="product-name" required>
-                    
-                    <label for="product-price">Harga (Rp):</label>
-                    <input type="number" id="product-price" min="100" required>
-                    
-                    <label for="product-stock">Stok Awal:</label>
-                    <input type="number" id="product-stock" min="1" required>
+                    <hr style="margin:12px 0; border:none; height:1px; background:#f1f5f9">
 
-                    <label for="product-desc">Deskripsi:</label>
-                    <textarea id="product-desc" rows="3" required></textarea>
-                    
-                    <button type="submit" class="full-width">Tambahkan Produk</button>
-                </form>
+                    <div id="register-area" style="display:none">
+                        <h2 style="font-size:15px; margin-bottom:8px">Register Pengguna</h2>
+                        <div id="register-message" class="message error"></div>
+                        <form id="register-form">
+                            <label for="reg-email">Email (unik)</label>
+                            <input type="email" id="reg-email" required>
 
-                <h2>Daftar Produk</h2>
-                <div id="product-list" class="product-list">
+                            <label for="reg-password">Password</label>
+                            <input type="password" id="reg-password" required>
+
+                            <div style="display:flex; gap:8px; margin-top:10px">
+                                <button type="submit" class="btn primary">Register</button>
+                                <button type="button" id="cancel-register" class="btn ghost">Batal</button>
+                            </div>
+                        </form>
                     </div>
+                </div>
+
+                <div id="admin-card" class="card" style="margin-top:12px; display:none">
+                    <h2>Admin Dashboard</h2>
+                    <div class="admin-badge">ADMIN</div>
+                    <div id="admin-message" class="message error" style="margin-top:10px"></div>
+
+                    <h3 style="margin-top:12px; font-size:14px">Tambah Produk</h3>
+                    <form id="add-product-form">
+                        <label for="product-name">Nama Produk</label>
+                        <input type="text" id="product-name" required>
+
+                        <label for="product-price">Harga (Rp)</label>
+                        <input type="number" id="product-price" min="100" required>
+
+                        <label for="product-stock">Stok Awal</label>
+                        <input type="number" id="product-stock" min="1" required>
+
+                        <label for="product-desc">Deskripsi</label>
+                        <textarea id="product-desc" rows="3" required></textarea>
+
+                        <div style="margin-top:10px">
+                            <button type="submit" class="btn primary full">Tambahkan Produk</button>
+                        </div>
+                    </form>
+
+                    <h3 style="margin-top:12px">Daftar Produk</h3>
+                    <div id="product-list-admin" class="product-list"></div>
+                </div>
+
             </div>
-            
+
+            <!-- RIGHT: DASHBOARD USER -->
+            <div>
+                <div id="dashboard" class="card" style="display:none">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
+                        <div>
+                            <div class="balance">Halo, <strong id="welcome-user"></strong></div>
+                            <div class="muted" style="margin-top:6px">Saldo: <strong id="current-balance">Rp 0</strong></div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center">
+                            <button id="logout-btn" class="btn ghost">Logout</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:14px">
+                        <div id="topup-section">
+                            <h2 style="font-size:15px; margin-bottom:8px">Top Up Saldo</h2>
+                            <div id="topup-message" class="message info"></div>
+                            <form id="topup-form" style="display:flex; gap:8px; align-items:center">
+                                <input type="number" id="topup-amount" min="10000" placeholder="Jumlah (min 10000)" style="flex:1">
+                                <button type="submit" class="btn primary">Request</button>
+                            </form>
+                        </div>
+
+                        <hr style="margin:16px 0; border:none; height:1px; background:#f1f5f9">
+
+                        <div id="order-section">
+                            <h2 style="font-size:15px; margin-bottom:8px">Buat Order Otomatis</h2>
+                            <div id="order-message" class="message error"></div>
+
+                            <div id="product-list-user" class="product-list"></div>
+
+                            <div id="order-form-area" style="display:none; margin-top:10px">
+                                <form id="order-form">
+                                    <label for="link">Link Target</label>
+                                    <input type="text" id="link" placeholder="Masukkan link target" required>
+                                    <div style="display:flex; gap:8px; margin-top:8px">
+                                        <button type="submit" class="btn primary full">Proses Order</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="public-note" class="card" style="margin-top:12px">
+                    <h2 style="font-size:15px">Catatan</h2>
+                    <p class="muted" style="margin:0">Demo ini menyimpan data di penyimpanan browser (localStorage). Untuk deployment nyata, sambungkan ke backend & database, jangan simpan password di frontend.</p>
+                </div>
+            </div>
         </div>
+
+        <footer>
+            &copy; Demo Sistem Order • Built for you
+        </footer>
     </div>
-    
+
     <script>
-        // --- JAVASCRIPT LOGIC ---
-        
-        // Konstanta
+        // --- CONFIG ---
         const MIN_DEPOSIT = 10000;
         const ADMIN_USERNAME = 'admin';
-        const ADMIN_PASSWORD = 'admins6'; // SANGAT TIDAK AMAN DI FRONTEND
-        
+        const ADMIN_PASSWORD = 'admins5'; // diubah jadi admins5
+
         const AUTSC_API_KEY = 'b67ff890-491c-4732-9ed4-453514fcccaa';
         const AUTSC_DEPOSIT_URL = 'https://my-payment.autsc.my.id/api/deposit';
-        // URL ASUMSI untuk cek status transaksi
-        const AUTSC_CHECK_URL = 'https://my-payment.autsc.my.id/api/check_status'; 
-        
-        // --- UTILITY FUNCTIONS ---
-        
-        function showMessage(id, text, type) {
-            const el = document.getElementById(id);
-            el.className = `message ${type}`;
+
+        // --- HELPERS ---
+        function show(el) { el.style.display = ''; }
+        function hide(el) { el.style.display = 'none'; }
+        function q(id){ return document.getElementById(id); }
+
+        function showMessage(id, text, type='info', timeout=5000){
+            const el = q(id);
+            if(!el) return;
+            el.className = 'message ' + (type==='success'?'success':(type==='error'?'error':'info'));
             el.innerText = text;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 5000);
+            show(el);
+            if(timeout>0){ setTimeout(()=>{ hide(el); }, timeout); }
         }
 
-        function formatRupiah(number) {
+        function formatRupiah(number){
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
         }
 
-        function loadUser() {
-            const userJson = localStorage.getItem('currentUser');
-            return userJson ? JSON.parse(userJson) : null;
+        function loadUser(){
+            const raw = localStorage.getItem('currentUser');
+            return raw ? JSON.parse(raw) : null;
+        }
+        function saveUser(user){ localStorage.setItem('currentUser', JSON.stringify(user)); updateDashboardDisplay(user); }
+
+        function getAllProducts(){ return JSON.parse(localStorage.getItem('products') || '[]'); }
+        function saveAllProducts(list){ localStorage.setItem('products', JSON.stringify(list)); }
+
+        // init sample products
+        if(!localStorage.getItem('products')){
+            const sample = [{ id:1, name:'Layanan Demo SMM', price:15000, stock:99, description:'Layanan percobaan untuk Order.' }];
+            localStorage.setItem('products', JSON.stringify(sample));
         }
 
-        function saveUser(user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            updateDashboardDisplay(user);
-        }
+        // --- UI wiring ---
+        const loginForm = q('login-form');
+        const registerArea = q('register-area');
+        const registerForm = q('register-form');
+        const showRegisterBtn = q('show-register');
+        const cancelRegisterBtn = q('cancel-register');
+        const adminCard = q('admin-card');
+        const dashboard = q('dashboard');
+        const productListAdmin = q('product-list-admin');
+        const productListUser = q('product-list-user');
+        const orderFormArea = q('order-form-area');
 
-        function updateDashboardDisplay(user) {
-            if (user && user.role !== 'admin') {
-                document.getElementById('welcome-user').innerText = user.email || user.username;
-                document.getElementById('current-balance').innerText = formatRupiah(user.balance);
-                populateProductList(); // Update produk di tampilan pengguna
-            }
-        }
-        
-        function showPage(pageId) {
-            ['login-page', 'register-page', 'dashboard-page', 'admin-page'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(pageId + '-page').classList.remove('hidden');
-        }
+        // toggle register
+        showRegisterBtn.addEventListener('click', ()=>{ show(registerArea); showMessage('register-message','Isi form registrasi di bawah','info'); });
+        cancelRegisterBtn.addEventListener('click', ()=>{ hide(registerArea); });
 
-        function showDashboardSection(section) {
-            document.getElementById('topup-section').classList.add('hidden');
-            document.getElementById('order-section').classList.add('hidden');
-            
-            document.getElementById(`${section}-section`).classList.remove('hidden');
-            
-            document.getElementById('btn-topup').style.backgroundColor = section === 'topup' ? '#007bff' : '#6c757d';
-            document.getElementById('btn-order').style.backgroundColor = section === 'order' ? '#007bff' : '#6c757d';
-        }
-
-        // --- AUTHENTICATION LOGIC (SIMULASI) ---
-        
-        function checkAuth() {
-            const user = loadUser();
-            if (user && user.isLoggedIn) {
-                if (user.role === 'admin') {
-                    showPage('admin');
-                    renderProductList(); // Render daftar produk di admin
-                } else {
-                    showPage('dashboard');
-                    showDashboardSection('topup');
-                }
-            } else {
-                showPage('login');
-            }
-        }
-        
-        function logout() {
-            const user = loadUser();
-            if (user) {
-                user.isLoggedIn = false;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-            }
-            alert('Logout berhasil.');
-            checkAuth();
-        }
-
-        // Initialize Products in LocalStorage if not exists
-        if (!localStorage.getItem('products')) {
-            localStorage.setItem('products', JSON.stringify([{ id: 1, name: 'Layanan Demo SMM', price: 15000, stock: 99, description: 'Layanan percobaan untuk Order.' }]));
-        }
-
-        document.getElementById('register-form').addEventListener('submit', function(e) {
+        // LOGIN
+        loginForm.addEventListener('submit', function(e){
             e.preventDefault();
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
+            const identifier = q('login-email').value.trim();
+            const password = q('login-password').value;
 
-            // Di dunia nyata, cek email unik di database
-            const newUser = { email, password, balance: 0, isLoggedIn: false, role: 'user', username: email.split('@')[0] };
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
-            
-            showMessage('register-message', 'Registrasi berhasil! Silakan Login.', 'success');
-            showPage('login');
-        });
-
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const identifier = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            if (identifier === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-                // Login Admin
-                const adminUser = { username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isLoggedIn: true, role: 'admin' };
-                localStorage.setItem('currentUser', JSON.stringify(adminUser));
-                showMessage('login-message', 'Login Admin berhasil!', 'success');
-                checkAuth();
+            // admin check
+            if(identifier === ADMIN_USERNAME && password === ADMIN_PASSWORD){
+                const adminUser = { username: ADMIN_USERNAME, isLoggedIn:true, role:'admin' };
+                saveUser(adminUser);
+                showMessage('login-message','Login admin berhasil','success');
+                renderState();
                 return;
             }
-            
+
+            // user check: in this demo we only keep one user in currentUser (simple)
             const storedUser = loadUser();
-            
-            if (storedUser && (storedUser.email === identifier || storedUser.username === identifier) && storedUser.password === password) {
-                // Login User
-                storedUser.isLoggedIn = true;
-                storedUser.role = 'user'; // Ensure role is set
-                saveUser(storedUser);
-                showMessage('login-message', 'Login Pengguna berhasil!', 'success');
-                checkAuth();
-            } else {
-                showMessage('login-message', 'Email/Username atau Password salah.', 'error');
+            if(storedUser && (storedUser.email === identifier || storedUser.username === identifier) && storedUser.password === password){
+                storedUser.isLoggedIn = true; storedUser.role='user'; saveUser(storedUser);
+                showMessage('login-message','Login pengguna berhasil','success');
+                renderState();
+                return;
             }
+
+            showMessage('login-message','Email/Username atau password salah','error');
         });
 
-
-        // --- DEPOSIT/TOP UP LOGIC (SAMA SEPERTI SEBELUMNYA) ---
-
-        document.getElementById('topup-form').addEventListener('submit', async function(e) {
+        // REGISTER
+        registerForm.addEventListener('submit', function(e){
             e.preventDefault();
-            const amount = parseInt(document.getElementById('topup-amount').value);
-            const user = loadUser();
+            const email = q('reg-email').value.trim();
+            const password = q('reg-password').value;
+            if(!email || !password){ showMessage('register-message','Lengkapi form registrasi','error'); return; }
 
-            if (!user) {
-                showMessage('topup-message', 'Anda harus login untuk top up.', 'error');
-                return;
-            }
-
-            if (amount < MIN_DEPOSIT) {
-                showMessage('topup-message', `Minimal deposit adalah ${formatRupiah(MIN_DEPOSIT)}.`, 'error');
-                return;
-            }
-
-            try {
-                const depositUrl = `${AUTSC_DEPOSIT_URL}?amount=${amount}&apikey=${AUTSC_API_KEY}`;
-                
-                showMessage('topup-message', 'Membuat permintaan deposit...', 'success');
-                
-                const response = await fetch(depositUrl);
-                const data = await response.json();
-                
-                if (data.status === 'success' && data.payment_url) {
-                    const trxId = data.trx_id;
-
-                    localStorage.setItem('lastTrxId', trxId);
-                    localStorage.setItem('lastTrxAmount', amount);
-
-                    showMessage('topup-message', `Deposit dibuat. Redirect ke halaman pembayaran... ID: ${trxId}`, 'success');
-                    
-                    setTimeout(() => {
-                        // SIMULASI Redirect
-                        alert(`SIMULASI: Redirect ke URL Pembayaran:\n${data.payment_url}\n\nSetelah pembayaran, klik OK untuk mengecek status.`);
-                        
-                        checkDepositStatus(trxId, amount);
-
-                    }, 2000);
-
-                } else {
-                    showMessage('topup-message', `Gagal membuat deposit: ${data.message || 'Respons tidak valid.'}`, 'error');
-                }
-
-            } catch (error) {
-                console.error('Error saat request deposit:', error);
-                showMessage('topup-message', 'Terjadi kesalahan jaringan/server.', 'error');
-            }
+            const newUser = { email, password, balance:0, isLoggedIn:false, role:'user', username: email.split('@')[0] };
+            // Simpan sebagai currentUser (demo). Untuk multi-user, gunakan array di localStorage.
+            saveUser(newUser);
+            showMessage('register-message','Registrasi berhasil! Silakan login.', 'success');
+            hide(registerArea);
         });
 
-        async function checkDepositStatus(trxId, amount) {
-            const user = loadUser();
-            if (!user) return;
+        // LOGOUT
+        q('logout-btn').addEventListener('click', function(){
+            const u = loadUser(); if(u){ u.isLoggedIn = false; saveUser(u); }
+            showMessage('login-message','Logout berhasil','info'); renderState();
+        });
 
-            showMessage('topup-message', `Mengecek status pembayaran untuk ID ${trxId}. Tunggu...`, 'success');
-            
-            // SIMULASI CEK STATUS
-            setTimeout(() => {
-                const isPaid = confirm(`SIMULASI: Status untuk TRX ${trxId} dibayar? Klik OK untuk tambah saldo.`);
-
-                if (isPaid) {
-                    // Update user balance in localStorage
-                    user.balance += amount;
-                    saveUser(user);
-
-                    showMessage('topup-message', `✅ Sukses! Saldo Anda bertambah ${formatRupiah(amount)}.`, 'success');
-                    localStorage.removeItem('lastTrxId');
-                    localStorage.removeItem('lastTrxAmount');
-                } else {
-                    showMessage('topup-message', '❌ Pembayaran belum terdeteksi (Pending/Expired).', 'error');
-                }
-            }, 3000);
-        }
-
-        // --- ADMIN PRODUCT LOGIC (SIMULASI CRUD) ---
-
-        /** Menambahkan produk baru */
-        document.getElementById('add-product-form').addEventListener('submit', function(e) {
+        // ADD PRODUCT (ADMIN)
+        q('add-product-form').addEventListener('submit', function(e){
             e.preventDefault();
-            const name = document.getElementById('product-name').value;
-            const price = parseInt(document.getElementById('product-price').value);
-            const stock = parseInt(document.getElementById('product-stock').value);
-            const description = document.getElementById('product-desc').value;
+            const name = q('product-name').value.trim();
+            const price = parseInt(q('product-price').value) || 0;
+            const stock = parseInt(q('product-stock').value) || 0;
+            const description = q('product-desc').value.trim();
+            if(!name || price<=0 || stock<=0){ showMessage('admin-message','Lengkapi data produk','error'); return; }
 
-            let products = JSON.parse(localStorage.getItem('products')) || [];
-            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-
-            const newProduct = { id: newId, name, price, stock, description };
-            products.push(newProduct);
-            localStorage.setItem('products', JSON.stringify(products));
-
-            showMessage('admin-message', `Produk '${name}' berhasil ditambahkan!`, 'success');
-            document.getElementById('add-product-form').reset();
-            renderProductList();
+            const products = getAllProducts();
+            const newId = products.length>0 ? Math.max(...products.map(p=>p.id))+1 : 1;
+            products.push({ id:newId, name, price, stock, description });
+            saveAllProducts(products);
+            showMessage('admin-message', `Produk '${name}' berhasil ditambahkan`, 'success');
+            q('add-product-form').reset(); renderProductListAdmin(); renderProductListUser();
         });
 
-        /** Menampilkan daftar produk di Admin Dashboard */
-        function renderProductList() {
-            const listContainer = document.getElementById('product-list');
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            listContainer.innerHTML = '';
-
-            if (products.length === 0) {
-                listContainer.innerHTML = '<p>Belum ada produk.</p>';
-                return;
-            }
-
-            products.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'product-item';
-                item.innerHTML = `
-                    <strong>${p.name}</strong> (ID: ${p.id})<br>
-                    Harga: ${formatRupiah(p.price)} | Stok: ${p.stock}<br>
-                    Deskripsi: ${p.description}<br>
-                    <button onclick="deleteProduct(${p.id})" style="margin-top: 5px; background-color: #dc3545;">Hapus</button>
+        // RENDER admin product list
+        function renderProductListAdmin(){
+            const products = getAllProducts();
+            productListAdmin.innerHTML = '';
+            if(products.length===0){ productListAdmin.innerHTML = '<p class="muted">Belum ada produk.</p>'; return; }
+            products.forEach(p=>{
+                const wrap = document.createElement('div'); wrap.className = 'product-item';
+                wrap.innerHTML = `
+                    <div class="product-info">
+                        <strong>${p.name}</strong>
+                        <div class="muted">Harga: ${formatRupiah(p.price)} • Stok: ${p.stock}</div>
+                        <div class="muted" style="margin-top:6px">${p.description}</div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center">
+                        <button class="btn ghost" onclick="editProduct(${p.id})">Edit</button>
+                        <button class="btn danger" onclick="deleteProduct(${p.id})">Hapus</button>
+                    </div>
                 `;
-                listContainer.appendChild(item);
+                productListAdmin.appendChild(wrap);
             });
         }
-        
-        /** Menghapus produk (Simulasi) */
-        function deleteProduct(id) {
-            if (!confirm('Anda yakin ingin menghapus produk ini?')) return;
-            
-            let products = JSON.parse(localStorage.getItem('products')) || [];
-            products = products.filter(p => p.id !== id);
-            localStorage.setItem('products', JSON.stringify(products));
-            
-            showMessage('admin-message', 'Produk berhasil dihapus!', 'success');
-            renderProductList();
+
+        // RENDER user product list
+        function renderProductListUser(){
+            const products = getAllProducts();
+            productListUser.innerHTML = '';
+            if(products.length===0){ productListUser.innerHTML = '<p class="muted">Belum ada produk tersedia.</p>'; return; }
+            products.forEach(p=>{
+                const wrap = document.createElement('div'); wrap.className = 'product-item';
+                wrap.innerHTML = `
+                    <div class="product-info">
+                        <strong>${p.name}</strong>
+                        <div class="muted">Harga: ${formatRupiah(p.price)} • Stok: ${p.stock}</div>
+                        <div class="muted" style="margin-top:6px">${p.description}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center">
+                        <button class="btn primary" ${p.stock<=0?'disabled':''} onclick="startOrder(${p.id})">Beli</button>
+                    </div>
+                `;
+                productListUser.appendChild(wrap);
+            });
         }
 
-        // --- ORDER LOGIC (UPDATE UNTUK MEMILIH PRODUK) ---
-        
-        /** Mengisi dropdown produk di Dashboard Pengguna */
-        function populateProductList() {
-            const selectEl = document.getElementById('order-product');
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            selectEl.innerHTML = '';
-            
-            const infoEl = document.getElementById('selected-product-info');
-            infoEl.innerHTML = '';
+        // delete product (admin)
+        window.deleteProduct = function(id){ if(!confirm('Hapus produk ini?')) return; let products = getAllProducts(); products = products.filter(p=>p.id!==id); saveAllProducts(products); showMessage('admin-message','Produk dihapus','success'); renderProductListAdmin(); renderProductListUser(); }
 
-            if (products.length === 0) {
-                selectEl.innerHTML = '<option value="">Tidak ada produk tersedia</option>';
-                return;
-            }
+        // edit product (simple inline prompt)
+        window.editProduct = function(id){ const products = getAllProducts(); const p = products.find(x=>x.id===id); if(!p) return; const name = prompt('Nama produk', p.name); if(name===null) return; const price = parseInt(prompt('Harga', p.price)); if(isNaN(price)) return; const stock = parseInt(prompt('Stok', p.stock)); if(isNaN(stock)) return; p.name=name; p.price=price; p.stock=stock; saveAllProducts(products); renderProductListAdmin(); renderProductListUser(); showMessage('admin-message','Produk diperbarui','success'); }
 
-            products.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.id;
-                option.text = `${p.name} (${formatRupiah(p.price)})`;
-                option.setAttribute('data-price', p.price);
-                selectEl.appendChild(option);
-            });
-            
-            // Tambahkan event listener untuk menampilkan info harga
-            selectEl.addEventListener('change', function() {
-                const selected = selectEl.options[selectEl.selectedIndex];
-                const price = selected.getAttribute('data-price');
-                if (price) {
-                    infoEl.innerHTML = `<p><strong>Harga: ${formatRupiah(parseInt(price))}</strong></p>`;
-                } else {
-                    infoEl.innerHTML = '';
-                }
-            });
-            
-            // Trigger change event agar info harga default muncul
-            if (selectEl.options.length > 0) {
-                selectEl.dispatchEvent(new Event('change'));
-            }
+        // ORDER flow
+        let currentOrderProduct = null;
+        window.startOrder = function(productId){
+            const user = loadUser(); if(!user || !user.isLoggedIn || user.role==='admin'){ showMessage('order-message','Anda harus login sebagai pengguna untuk melakukan order','error'); return; }
+            const products = getAllProducts(); const p = products.find(x=>x.id===productId); if(!p){ showMessage('order-message','Produk tidak ditemukan','error'); return; }
+            if(p.stock<=0){ showMessage('order-message','Stok habis','error'); return; }
+            currentOrderProduct = p;
+            orderFormArea.style.display = '';
+            q('link').value = '';
+            showMessage('order-message', `Menyiapkan order: ${p.name} — Harga ${formatRupiah(p.price)}`, 'info');
         }
 
-        document.getElementById('order-form').addEventListener('submit', async function(e) {
+        q('order-form').addEventListener('submit', function(e){
             e.preventDefault();
-            const user = loadUser();
-            const productId = parseInt(document.getElementById('order-product').value);
-            const link = document.getElementById('link').value;
-            
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const product = products.find(p => p.id === productId);
-            
-            if (!product) {
-                showMessage('order-message', 'Produk tidak ditemukan.', 'error');
-                return;
-            }
+            const user = loadUser(); if(!user || !user.isLoggedIn || user.role==='admin'){ showMessage('order-message','Anda harus login sebagai pengguna', 'error'); return; }
+            if(!currentOrderProduct){ showMessage('order-message','Pilih produk terlebih dahulu', 'error'); return; }
+            const link = q('link').value.trim(); if(!link){ showMessage('order-message','Masukkan link target', 'error'); return; }
 
-            if (user.balance < product.price) {
-                showMessage('order-message', `Saldo kurang! Butuh ${formatRupiah(product.price)}. Saldo Anda: ${formatRupiah(user.balance)}.`, 'error');
-                return;
-            }
-            
-            if (product.stock <= 0) {
-                showMessage('order-message', `Stok produk ${product.name} habis.`, 'error');
-                return;
-            }
-            
-            // 1. Kurangi Saldo User (SIMULASI DATABASE)
-            user.balance -= product.price;
-            saveUser(user);
+            const products = getAllProducts(); const prod = products.find(x=>x.id===currentOrderProduct.id);
+            if(!prod || prod.stock<=0){ showMessage('order-message','Stok tidak tersedia', 'error'); return; }
+            if(user.balance < prod.price){ showMessage('order-message', `Saldo kurang. Butuh ${formatRupiah(prod.price)}.`, 'error'); return; }
 
-            // 2. Kurangi Stok Produk (SIMULASI DATABASE)
-            product.stock -= 1;
-            localStorage.setItem('products', JSON.stringify(products.map(p => p.id === productId ? product : p)));
-
-            showMessage('order-message', 'Saldo dikurangi. Memproses order ke API layanan...', 'success');
-            
-            try {
-                // SIMULASI SUKSES ORDER
-                setTimeout(() => {
-                    showMessage('order-message', `✅ ORDER SUKSES! ${product.name}. Saldo terpotong ${formatRupiah(product.price)} untuk link ${link}.`, 'success');
-                }, 2500);
-
-            } catch (error) {
-                // Refund logic Sederhana (SIMULASI):
-                user.balance += product.price; 
-                product.stock += 1;
-                saveUser(user);
-                localStorage.setItem('products', JSON.stringify(products.map(p => p.id === productId ? product : p)));
-                showMessage('order-message', '❌ Gagal terhubung ke API Order. Saldo dikembalikan!', 'error');
-            }
-            populateProductList(); // Refresh list untuk update stok
+            // proses (simulasi)
+            user.balance -= prod.price; prod.stock -= 1; saveUser(user); saveAllProducts(products);
+            showMessage('order-message', `✅ ORDER SUKSES! ${prod.name} • Saldo terpotong ${formatRupiah(prod.price)}`, 'success');
+            currentOrderProduct = null; orderFormArea.style.display = 'none'; renderProductListUser(); renderProductListAdmin();
         });
 
-        // Inisialisasi Aplikasi
-        window.onload = checkAuth;
+        // TOPUP flow (simulasi)
+        q('topup-form').addEventListener('submit', async function(e){
+            e.preventDefault(); const amount = parseInt(q('topup-amount').value) || 0; const user = loadUser(); if(!user){ showMessage('topup-message','Anda harus login', 'error'); return; }
+            if(amount < MIN_DEPOSIT){ showMessage('topup-message', `Minimal ${formatRupiah(MIN_DEPOSIT)}`, 'error'); return; }
+            showMessage('topup-message', 'Membuat permintaan deposit (simulasi)...', 'info');
+            // simulate external payment
+            setTimeout(()=>{
+                if(confirm(`SIMULASI: Bayar ${formatRupiah(amount)} sekarang? Klik OK untuk sukses.`)){
+                    user.balance += amount; saveUser(user); showMessage('topup-message', `Topup sukses: ${formatRupiah(amount)}`, 'success');
+                } else {
+                    showMessage('topup-message','Pembayaran belum terdeteksi', 'error');
+                }
+            }, 1200);
+        });
+
+        // state render
+        function renderState(){
+            const u = loadUser();
+            if(u && u.isLoggedIn){
+                if(u.role==='admin'){
+                    show(adminCard); hide(q('login-card')); hide(dashboard); showMessage('login-message','Anda sebagai admin', 'info', 2000);
+                } else {
+                    show(dashboard); hide(q('login-card')); hide(adminCard);
+                    q('welcome-user').innerText = u.username || u.email;
+                    q('current-balance').innerText = formatRupiah(u.balance || 0);
+                }
+            } else {
+                hide(adminCard); hide(dashboard); show(q('login-card'));
+            }
+            renderProductListAdmin(); renderProductListUser();
+        }
+
+        function updateDashboardDisplay(user){ if(!user) return; q('welcome-user').innerText = user.username || user.email; q('current-balance').innerText = formatRupiah(user.balance || 0); }
+
+        // initial
+        renderState();
+
+        // expose some functions for console/debug
+        window.startDemoAdmin = function(){ q('login-email').value='admin'; q('login-password').value='admins5'; loginForm.dispatchEvent(new Event('submit')) }
 
     </script>
 </body>
