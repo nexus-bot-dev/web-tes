@@ -1,257 +1,604 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QRIS Payment Generator & Status Checker</title>
+    <title>Sistem Order Otomatis + Admin (Demo)</title>
     <style>
+        /* --- CSS STYLES --- */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f0f2f5;
+            background-color: #f4f4f9;
+            color: #333;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
         .container {
-            background-color: #ffffff;
+            background-color: #fff;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 700px; /* Lebih lebar untuk admin */
         }
         h1 {
-            color: #1a73e8;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .balance-box {
-            background-color: #e8f0fe;
-            color: #1a73e8;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
+            color: #007bff;
             text-align: center;
             margin-bottom: 20px;
+        }
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        input[type="number"] {
-            width: 95%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 17px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover:not(:disabled) {
-            background-color: #1e7e34;
-        }
-        .qris-display {
-            margin-top: 30px;
-            padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            text-align: center;
-            display: none; /* Sembunyikan secara default */
-        }
-        .qris-display img {
-            max-width: 80%;
-            height: auto;
-            border: 5px solid #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .status-info {
-            margin-top: 15px;
-            font-size: 1.1em;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-        .success-animation {
-            font-size: 4em;
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            margin-top: 5px;
+        }
+        button.full-width {
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .logout-btn {
+            float: right;
+            background-color: #dc3545;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .balance {
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .product-list {
+            margin-top: 20px;
+        }
+        .product-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        .product-item strong {
             color: #28a745;
-            display: none;
-            animation: pulse 1.5s infinite;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>💵 QRIS Payment & Saldo Cek</h1>
+        <h1>Sistem Order & Top Up Otomatis</h1>
+        
+        <div id="app-area">
+            
+            <div id="login-page">
+                <h2>Login Pengguna</h2>
+                <div id="login-message" class="message error"></div>
+                <form id="login-form">
+                    <label for="login-email">Email/Username:</label>
+                    <input type="text" id="login-email" required placeholder="User: test@mail.com | Admin: admin">
+                    
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" required placeholder="User: 123 | Admin: admins6">
+                    
+                    <button type="submit" class="full-width">Login</button>
+                    <a href="#" onclick="showPage('register')">Belum punya akun? Register</a>
+                </form>
+            </div>
+            
+            <div id="register-page" class="hidden">
+                <h2>Register Pengguna</h2>
+                <div id="register-message" class="message error"></div>
+                <form id="register-form">
+                    <label for="reg-email">Email (gunakan email unik):</label>
+                    <input type="email" id="reg-email" required>
+                    
+                    <label for="reg-password">Password:</label>
+                    <input type="password" id="reg-password" required>
+                    
+                    <button type="submit" class="full-width">Register</button>
+                    <a href="#" onclick="showPage('login')">Sudah punya akun? Login</a>
+                </form>
+            </div>
+            
+            <div id="dashboard-page" class="hidden">
+                <div class="balance">
+                    Halo, <span id="welcome-user"></span>! Saldo Anda: <span id="current-balance">Rp 0</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+                
+                <button onclick="showDashboardSection('topup')" id="btn-topup">Top Up Saldo</button>
+                <button onclick="showDashboardSection('order')" id="btn-order">Buat Order</button>
 
-        <div class="balance-box">
-            Saldo Anda: <span id="currentBalance">Memuat...</span>
-        </div>
+                <hr style="margin: 15px 0;">
 
-        <label for="amountInput">Jumlah Deposit (Min. 1000):</label>
-        <input type="number" id="amountInput" value="1000" min="1000">
+                <div id="topup-section">
+                    <h2>Top Up Saldo</h2>
+                    <div id="topup-message" class="message success"></div>
+                    <form id="topup-form">
+                        <label for="topup-amount">Jumlah Deposit (min 10000):</label>
+                        <input type="number" id="topup-amount" min="10000" required>
+                        <button type="submit" class="full-width">Request Pembayaran</button>
+                    </form>
+                </div>
+                
+                <div id="order-section" class="hidden">
+                    <h2>Buat Order Otomatis</h2>
+                    <div id="order-message" class="message error"></div>
+                    <form id="order-form">
+                        <label for="order-product">Pilih Produk:</label>
+                        <select id="order-product" required>
+                            </select>
+                        <div id="selected-product-info"></div>
+                        
+                        <label for="link">Link Target:</label>
+                        <input type="text" id="link" required>
+                        
+                        <button type="submit" class="full-width">Proses Order</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="admin-page" class="hidden">
+                <div class="balance" style="background-color: #ffc107;">
+                    ADMIN DASHBOARD <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
 
-        <button id="generateBtn" onclick="generateQRIS()">Generate QRIS</button>
+                <h2>Tambah Produk Baru</h2>
+                <div id="admin-message" class="message error"></div>
+                <form id="add-product-form">
+                    <label for="product-name">Nama Produk:</label>
+                    <input type="text" id="product-name" required>
+                    
+                    <label for="product-price">Harga (Rp):</label>
+                    <input type="number" id="product-price" min="100" required>
+                    
+                    <label for="product-stock">Stok Awal:</label>
+                    <input type="number" id="product-stock" min="1" required>
 
-        <div class="qris-display" id="qrisDisplay">
-            <h3>Scan QRIS di Bawah</h3>
-            <p>ID Transaksi: <strong id="trxIdDisplay"></strong></p>
-            <img id="qrisImage" src="" alt="QRIS Code">
-            <p>Total Bayar: <strong id="totalAmountDisplay"></strong></p>
-            <div class="status-info" id="statusInfo">Menunggu Pembayaran...</div>
-            <div class="success-animation" id="successAnim">✅</div>
+                    <label for="product-desc">Deskripsi:</label>
+                    <textarea id="product-desc" rows="3" required></textarea>
+                    
+                    <button type="submit" class="full-width">Tambahkan Produk</button>
+                </form>
+
+                <h2>Daftar Produk</h2>
+                <div id="product-list" class="product-list">
+                    </div>
+            </div>
+            
         </div>
     </div>
-
+    
     <script>
-        // *** KONFIGURASI API KEY ANDA ***
-        const API_KEY = "b67ff890-491c-4732-9ed4-453514fcccaa";
-        const DEPOSIT_URL = "https://my-payment.autsc.my.id/api/deposit";
+        // --- JAVASCRIPT LOGIC ---
         
-        // Asumsi URL Cek Saldo dan Cek Transaksi (HARUS DIGANTI DENGAN ENDPOINT ASLI)
-        const BALANCE_URL = "https://my-payment.autsc.my.id/api/balance"; // ASUMSI
-        const CHECK_URL = "https://my-payment.autsc.my.id/api/check"; // ASUMSI
-
-        let currentTrxId = null;
-        let checkInterval = null;
-
-        // --- 1. Fungsi Format Rupiah ---
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0
-            }).format(number);
+        // Konstanta
+        const MIN_DEPOSIT = 10000;
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'admins6'; // SANGAT TIDAK AMAN DI FRONTEND
+        
+        const AUTSC_API_KEY = 'b67ff890-491c-4732-9ed4-453514fcccaa';
+        const AUTSC_DEPOSIT_URL = 'https://my-payment.autsc.my.id/api/deposit';
+        // URL ASUMSI untuk cek status transaksi
+        const AUTSC_CHECK_URL = 'https://my-payment.autsc.my.id/api/check_status'; 
+        
+        // --- UTILITY FUNCTIONS ---
+        
+        function showMessage(id, text, type) {
+            const el = document.getElementById(id);
+            el.className = `message ${type}`;
+            el.innerText = text;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
         }
-        
-        // --- 2. Fungsi Cek Saldo (Jika ada API-nya) ---
-        async function fetchBalance() {
-            try {
-                // Di sini, Anda harus mengganti dengan endpoint API Cek Saldo yang sebenarnya
-                const response = await fetch(`${BALANCE_URL}?apikey=${API_KEY}`); 
-                // Karena API cek saldo tidak disediakan, kita akan tampilkan saldo default
-                document.getElementById('currentBalance').textContent = "Rp 1.000.000"; 
-            } catch (error) {
-                console.error("Gagal mengambil saldo:", error);
-                document.getElementById('currentBalance').textContent = "Gagal (API tidak ditemukan)";
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+        }
+
+        function loadUser() {
+            const userJson = localStorage.getItem('currentUser');
+            return userJson ? JSON.parse(userJson) : null;
+        }
+
+        function saveUser(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            updateDashboardDisplay(user);
+        }
+
+        function updateDashboardDisplay(user) {
+            if (user && user.role !== 'admin') {
+                document.getElementById('welcome-user').innerText = user.email || user.username;
+                document.getElementById('current-balance').innerText = formatRupiah(user.balance);
+                populateProductList(); // Update produk di tampilan pengguna
             }
         }
+        
+        function showPage(pageId) {
+            ['login-page', 'register-page', 'dashboard-page', 'admin-page'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(pageId + '-page').classList.remove('hidden');
+        }
 
-        // --- 3. Fungsi Generate QRIS ---
-        async function generateQRIS() {
-            const amount = document.getElementById('amountInput').value;
-            if (parseInt(amount) < 1000) {
-                alert("Jumlah deposit minimal adalah 1000.");
+        function showDashboardSection(section) {
+            document.getElementById('topup-section').classList.add('hidden');
+            document.getElementById('order-section').classList.add('hidden');
+            
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            
+            document.getElementById('btn-topup').style.backgroundColor = section === 'topup' ? '#007bff' : '#6c757d';
+            document.getElementById('btn-order').style.backgroundColor = section === 'order' ? '#007bff' : '#6c757d';
+        }
+
+        // --- AUTHENTICATION LOGIC (SIMULASI) ---
+        
+        function checkAuth() {
+            const user = loadUser();
+            if (user && user.isLoggedIn) {
+                if (user.role === 'admin') {
+                    showPage('admin');
+                    renderProductList(); // Render daftar produk di admin
+                } else {
+                    showPage('dashboard');
+                    showDashboardSection('topup');
+                }
+            } else {
+                showPage('login');
+            }
+        }
+        
+        function logout() {
+            const user = loadUser();
+            if (user) {
+                user.isLoggedIn = false;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+            }
+            alert('Logout berhasil.');
+            checkAuth();
+        }
+
+        // Initialize Products in LocalStorage if not exists
+        if (!localStorage.getItem('products')) {
+            localStorage.setItem('products', JSON.stringify([{ id: 1, name: 'Layanan Demo SMM', price: 15000, stock: 99, description: 'Layanan percobaan untuk Order.' }]));
+        }
+
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            // Di dunia nyata, cek email unik di database
+            const newUser = { email, password, balance: 0, isLoggedIn: false, role: 'user', username: email.split('@')[0] };
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            
+            showMessage('register-message', 'Registrasi berhasil! Silakan Login.', 'success');
+            showPage('login');
+        });
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if (identifier === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                // Login Admin
+                const adminUser = { username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isLoggedIn: true, role: 'admin' };
+                localStorage.setItem('currentUser', JSON.stringify(adminUser));
+                showMessage('login-message', 'Login Admin berhasil!', 'success');
+                checkAuth();
+                return;
+            }
+            
+            const storedUser = loadUser();
+            
+            if (storedUser && (storedUser.email === identifier || storedUser.username === identifier) && storedUser.password === password) {
+                // Login User
+                storedUser.isLoggedIn = true;
+                storedUser.role = 'user'; // Ensure role is set
+                saveUser(storedUser);
+                showMessage('login-message', 'Login Pengguna berhasil!', 'success');
+                checkAuth();
+            } else {
+                showMessage('login-message', 'Email/Username atau Password salah.', 'error');
+            }
+        });
+
+
+        // --- DEPOSIT/TOP UP LOGIC (SAMA SEPERTI SEBELUMNYA) ---
+
+        document.getElementById('topup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('topup-amount').value);
+            const user = loadUser();
+
+            if (!user) {
+                showMessage('topup-message', 'Anda harus login untuk top up.', 'error');
                 return;
             }
 
-            // Nonaktifkan tombol saat proses
-            document.getElementById('generateBtn').disabled = true;
-            document.getElementById('generateBtn').textContent = 'Memproses...';
-            
-            // Hentikan interval pengecekan sebelumnya (jika ada)
-            if (checkInterval) clearInterval(checkInterval);
-            document.getElementById('qrisDisplay').style.display = 'none';
-            document.getElementById('successAnim').style.display = 'none';
+            if (amount < MIN_DEPOSIT) {
+                showMessage('topup-message', `Minimal deposit adalah ${formatRupiah(MIN_DEPOSIT)}.`, 'error');
+                return;
+            }
 
             try {
-                const url = `${DEPOSIT_URL}?amount=${amount}&apikey=${API_KEY}`;
-                const response = await fetch(url);
+                const depositUrl = `${AUTSC_DEPOSIT_URL}?amount=${amount}&apikey=${AUTSC_API_KEY}`;
+                
+                showMessage('topup-message', 'Membuat permintaan deposit...', 'success');
+                
+                const response = await fetch(depositUrl);
                 const data = await response.json();
+                
+                if (data.status === 'success' && data.payment_url) {
+                    const trxId = data.trx_id;
 
-                if (data.status === 'success') {
-                    const trx = data.data;
-                    currentTrxId = trx.transaction_id;
+                    localStorage.setItem('lastTrxId', trxId);
+                    localStorage.setItem('lastTrxAmount', amount);
 
-                    // Tampilkan QRIS
-                    document.getElementById('trxIdDisplay').textContent = trx.transaction_id;
-                    document.getElementById('qrisImage').src = trx.qris_url;
-                    document.getElementById('totalAmountDisplay').textContent = formatRupiah(trx.total_amount);
-                    document.getElementById('statusInfo').textContent = 'Menunggu Pembayaran...';
-                    document.getElementById('statusInfo').style.color = '#ff9800'; // Orange
-                    document.getElementById('qrisDisplay').style.display = 'block';
+                    showMessage('topup-message', `Deposit dibuat. Redirect ke halaman pembayaran... ID: ${trxId}`, 'success');
+                    
+                    setTimeout(() => {
+                        // SIMULASI Redirect
+                        alert(`SIMULASI: Redirect ke URL Pembayaran:\n${data.payment_url}\n\nSetelah pembayaran, klik OK untuk mengecek status.`);
+                        
+                        checkDepositStatus(trxId, amount);
 
-                    // Mulai pengecekan status setiap 5 detik
-                    checkInterval = setInterval(checkTransactionStatus, 5000); 
+                    }, 2000);
 
                 } else {
-                    alert('Gagal membuat QRIS: ' + (data.message || 'Respons tidak valid'));
+                    showMessage('topup-message', `Gagal membuat deposit: ${data.message || 'Respons tidak valid.'}`, 'error');
                 }
 
             } catch (error) {
-                console.error('Error saat generate QRIS:', error);
-                alert('Terjadi kesalahan koneksi.');
-            } finally {
-                document.getElementById('generateBtn').disabled = false;
-                document.getElementById('generateBtn').textContent = 'Generate QRIS';
+                console.error('Error saat request deposit:', error);
+                showMessage('topup-message', 'Terjadi kesalahan jaringan/server.', 'error');
+            }
+        });
+
+        async function checkDepositStatus(trxId, amount) {
+            const user = loadUser();
+            if (!user) return;
+
+            showMessage('topup-message', `Mengecek status pembayaran untuk ID ${trxId}. Tunggu...`, 'success');
+            
+            // SIMULASI CEK STATUS
+            setTimeout(() => {
+                const isPaid = confirm(`SIMULASI: Status untuk TRX ${trxId} dibayar? Klik OK untuk tambah saldo.`);
+
+                if (isPaid) {
+                    // Update user balance in localStorage
+                    user.balance += amount;
+                    saveUser(user);
+
+                    showMessage('topup-message', `✅ Sukses! Saldo Anda bertambah ${formatRupiah(amount)}.`, 'success');
+                    localStorage.removeItem('lastTrxId');
+                    localStorage.removeItem('lastTrxAmount');
+                } else {
+                    showMessage('topup-message', '❌ Pembayaran belum terdeteksi (Pending/Expired).', 'error');
+                }
+            }, 3000);
+        }
+
+        // --- ADMIN PRODUCT LOGIC (SIMULASI CRUD) ---
+
+        /** Menambahkan produk baru */
+        document.getElementById('add-product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('product-name').value;
+            const price = parseInt(document.getElementById('product-price').value);
+            const stock = parseInt(document.getElementById('product-stock').value);
+            const description = document.getElementById('product-desc').value;
+
+            let products = JSON.parse(localStorage.getItem('products')) || [];
+            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+
+            const newProduct = { id: newId, name, price, stock, description };
+            products.push(newProduct);
+            localStorage.setItem('products', JSON.stringify(products));
+
+            showMessage('admin-message', `Produk '${name}' berhasil ditambahkan!`, 'success');
+            document.getElementById('add-product-form').reset();
+            renderProductList();
+        });
+
+        /** Menampilkan daftar produk di Admin Dashboard */
+        function renderProductList() {
+            const listContainer = document.getElementById('product-list');
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            listContainer.innerHTML = '';
+
+            if (products.length === 0) {
+                listContainer.innerHTML = '<p>Belum ada produk.</p>';
+                return;
+            }
+
+            products.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'product-item';
+                item.innerHTML = `
+                    <strong>${p.name}</strong> (ID: ${p.id})<br>
+                    Harga: ${formatRupiah(p.price)} | Stok: ${p.stock}<br>
+                    Deskripsi: ${p.description}<br>
+                    <button onclick="deleteProduct(${p.id})" style="margin-top: 5px; background-color: #dc3545;">Hapus</button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+        
+        /** Menghapus produk (Simulasi) */
+        function deleteProduct(id) {
+            if (!confirm('Anda yakin ingin menghapus produk ini?')) return;
+            
+            let products = JSON.parse(localStorage.getItem('products')) || [];
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('products', JSON.stringify(products));
+            
+            showMessage('admin-message', 'Produk berhasil dihapus!', 'success');
+            renderProductList();
+        }
+
+        // --- ORDER LOGIC (UPDATE UNTUK MEMILIH PRODUK) ---
+        
+        /** Mengisi dropdown produk di Dashboard Pengguna */
+        function populateProductList() {
+            const selectEl = document.getElementById('order-product');
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            selectEl.innerHTML = '';
+            
+            const infoEl = document.getElementById('selected-product-info');
+            infoEl.innerHTML = '';
+
+            if (products.length === 0) {
+                selectEl.innerHTML = '<option value="">Tidak ada produk tersedia</option>';
+                return;
+            }
+
+            products.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.text = `${p.name} (${formatRupiah(p.price)})`;
+                option.setAttribute('data-price', p.price);
+                selectEl.appendChild(option);
+            });
+            
+            // Tambahkan event listener untuk menampilkan info harga
+            selectEl.addEventListener('change', function() {
+                const selected = selectEl.options[selectEl.selectedIndex];
+                const price = selected.getAttribute('data-price');
+                if (price) {
+                    infoEl.innerHTML = `<p><strong>Harga: ${formatRupiah(parseInt(price))}</strong></p>`;
+                } else {
+                    infoEl.innerHTML = '';
+                }
+            });
+            
+            // Trigger change event agar info harga default muncul
+            if (selectEl.options.length > 0) {
+                selectEl.dispatchEvent(new Event('change'));
             }
         }
 
-        // --- 4. Fungsi Cek Status Transaksi ---
-        async function checkTransactionStatus() {
-            if (!currentTrxId) return;
+        document.getElementById('order-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const user = loadUser();
+            const productId = parseInt(document.getElementById('order-product').value);
+            const link = document.getElementById('link').value;
+            
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const product = products.find(p => p.id === productId);
+            
+            if (!product) {
+                showMessage('order-message', 'Produk tidak ditemukan.', 'error');
+                return;
+            }
 
+            if (user.balance < product.price) {
+                showMessage('order-message', `Saldo kurang! Butuh ${formatRupiah(product.price)}. Saldo Anda: ${formatRupiah(user.balance)}.`, 'error');
+                return;
+            }
+            
+            if (product.stock <= 0) {
+                showMessage('order-message', `Stok produk ${product.name} habis.`, 'error');
+                return;
+            }
+            
+            // 1. Kurangi Saldo User (SIMULASI DATABASE)
+            user.balance -= product.price;
+            saveUser(user);
+
+            // 2. Kurangi Stok Produk (SIMULASI DATABASE)
+            product.stock -= 1;
+            localStorage.setItem('products', JSON.stringify(products.map(p => p.id === productId ? product : p)));
+
+            showMessage('order-message', 'Saldo dikurangi. Memproses order ke API layanan...', 'success');
+            
             try {
-                // ASUMSI: API Cek Status mengembalikan status 'flash' jika dibayar
-                const checkUrl = `${CHECK_URL}?transaction_id=${currentTrxId}&apikey=${API_KEY}`;
-                
-                // Karena API check tidak disediakan, kita akan buat simulasi
-                // Ganti kode di bawah dengan panggilan API yang sebenarnya:
-                /* const response = await fetch(checkUrl);
-                const data = await response.json(); 
-                const status = data.data.status; 
-                */
-                
-                // SIMULASI (Hapus ini jika API check sudah tersedia):
-                const statusList = ['pending', 'pending', 'pending', 'flash'];
-                const randomStatus = statusList[Math.floor(Math.random() * statusList.length)]; // Simulasi 25% chance of 'flash'
-                const status = randomStatus; 
-
-                // Logika Pengecekan
-                if (status === 'flash') {
-                    clearInterval(checkInterval); // Hentikan pengecekan
-                    document.getElementById('statusInfo').textContent = 'Pembayaran Berhasil! Saldo ditambahkan.';
-                    document.getElementById('statusInfo').style.color = '#28a745'; // Hijau
-                    document.getElementById('successAnim').style.display = 'block'; // Tampilkan animasi
-                    fetchBalance(); // Perbarui saldo
-                } else if (status === 'expired' || status === 'failed') {
-                    clearInterval(checkInterval);
-                    document.getElementById('statusInfo').textContent = 'Transaksi Kadaluarsa atau Gagal.';
-                    document.getElementById('statusInfo').style.color = '#dc3545'; // Merah
-                } else {
-                    document.getElementById('statusInfo').textContent = `Menunggu Pembayaran... (ID: ${currentTrxId})`;
-                    document.getElementById('statusInfo').style.color = '#ff9800';
-                }
+                // SIMULASI SUKSES ORDER
+                setTimeout(() => {
+                    showMessage('order-message', `✅ ORDER SUKSES! ${product.name}. Saldo terpotong ${formatRupiah(product.price)} untuk link ${link}.`, 'success');
+                }, 2500);
 
             } catch (error) {
-                console.error('Error saat cek status:', error);
-                // Biarkan interval berjalan, coba lagi
+                // Refund logic Sederhana (SIMULASI):
+                user.balance += product.price; 
+                product.stock += 1;
+                saveUser(user);
+                localStorage.setItem('products', JSON.stringify(products.map(p => p.id === productId ? product : p)));
+                showMessage('order-message', '❌ Gagal terhubung ke API Order. Saldo dikembalikan!', 'error');
             }
-        }
+            populateProductList(); // Refresh list untuk update stok
+        });
 
-        // Panggil fungsi cek saldo saat halaman dimuat
-        fetchBalance(); 
+        // Inisialisasi Aplikasi
+        window.onload = checkAuth;
+
     </script>
-
 </body>
 </html>
