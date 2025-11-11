@@ -1,0 +1,17 @@
+{
+    "DEPOSIT_API_KEY": "b67ff890-491c-4732-9ed4-453514fcccaa",
+    "DEPOSIT_BASE_URL": "https://my-payment.autsc.my.id/api",
+    "TOPUP_BONUS_PERCENT": 5,
+    "USER_STARTING_BALANCE": 0,
+    "PRICES": {
+        "ssh": 10000,
+        "vmess": 15000,
+        "trojan": 18000,
+        "vless": 20000
+    },
+    "DEFAULT_CONFIG": {
+        "limitip": 1,
+        "quota": 10,
+        "exp": 30
+    }
+}
