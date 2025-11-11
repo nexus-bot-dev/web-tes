@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Konfigurasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+        <a class="navbar-brand" href="#">🔑 Admin Panel</a>
+        <div class="d-flex">
+            <button class="btn btn-warning" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="mb-4">Panel Admin Konfigurasi</h1>
+    <div id="mainAlert" class="alert d-none" role="alert"></div>
+
+    <!-- Tab Menu -->
+    <ul class="nav nav-pills mb-3" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#settings">Pengaturan Umum</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#servers">Manajemen Server</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- TAB 1: PENGATURAN UMUM -->
+        <div class="tab-pane fade show active" id="settings">
+            <div class="card p-4">
+                <form id="configForm">
+                    <h5 class="mb-3">Konfigurasi API & Bonus</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Deposit API Key</label>
+                        <input type="text" class="form-control" name="DEPOSIT_API_KEY" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bonus Top-up (%)</label>
+                        <input type="number" class="form-control" name="TOPUP_BONUS_PERCENT" required>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Harga Akun (Rp)</h5>
+                    <div id="priceInputs" class="row">
+                        <!-- Harga akan dimuat oleh JS -->
+                    </div>
+                    
+                    <button type="submit" class="btn btn-danger w-100 mt-4">Simpan Konfigurasi</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 2: MANAJEMEN SERVER -->
+        <div class="tab-pane fade" id="servers">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="card p-3 mb-3">
+                        <h5 class="card-title">Tambah Server Baru</h5>
+                        <form id="addServerForm">
+                            <input type="text" class="form-control mb-2" id="serverName" placeholder="Nama Server (Contoh: USA-01)" required>
+                            <input type="text" class="form-control mb-2" id="serverDomain" placeholder="Domain API (Contoh: qzvx.uptime-server.my.id)" required>
+                            <input type="text" class="form-control mb-3" id="serverAuthKey" placeholder="Auth Key API" required>
+                            <button type="submit" class="btn btn-primary w-100">Simpan Server</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="card p-3">
+                        <h5 class="card-title">Daftar Server Aktif</h5>
+                        <ul class="list-group" id="serverList">
+                            <li class="list-group-item">Memuat...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken || localStorage.getItem('authRole') !== 'admin') { window.location.href = '/auth.html'; }
+    
+    const mainAlert = document.getElementById('mainAlert');
+    let currentConfig = {};
+
+    const showAlert = (message, type) => {
+        mainAlert.textContent = message;
+        mainAlert.className = `alert alert-${type}`;
+        mainAlert.classList.remove('d-none');
+        setTimeout(() => mainAlert.classList.add('d-none'), 5000);
+    };
+
+    // --- MUAT CONFIGURASI DAN SERVER ---
+    const fetchConfigAndServers = async () => {
+        try {
+            const response = await fetch('/api/config', { headers: { 'Authorization': `Bearer ${authToken}` } });
+            const result = await response.json();
+            if (response.ok && result.status) {
+                currentConfig = result.config;
+                renderConfigForm(result.config);
+                renderServerList(result.servers);
+            } else {
+                 showAlert(result.message || 'Gagal memuat konfigurasi. Pastikan Anda Admin.', 'danger');
+            }
+        } catch (error) {
+            showAlert('Kesalahan koneksi saat memuat data.', 'danger');
+        }
+    };
+    
+    // --- RENDER FORM KONFIGURASI ---
+    const renderConfigForm = (config) => {
+        document.querySelector('input[name="DEPOSIT_API_KEY"]').value = config.DEPOSIT_API_KEY || '';
+        document.querySelector('input[name="TOPUP_BONUS_PERCENT"]').value = config.TOPUP_BONUS_PERCENT || 0;
+
+        const priceInputs = document.getElementById('priceInputs');
+        priceInputs.innerHTML = '';
+        for (const type in config.PRICES) {
+            priceInputs.innerHTML += `
+                <div class="col-md-6 mb-3">
+                    <label class="form-label text-capitalize">${type} (Rp)</label>
+                    <input type="number" class="form-control" name="price_${type}" value="${config.PRICES[type]}" required>
+                </div>
+            `;
+        }
+    };
+    
+    // --- RENDER DAFTAR SERVER ---
+    const renderServerList = (servers) => {
+        const list = document.getElementById('serverList');
+        if (servers.length === 0) {
+            list.innerHTML = '<li class="list-group-item text-muted">Belum ada server yang terdaftar.</li>';
+            return;
+        }
+        list.innerHTML = servers.map(s => `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${s.name}</strong><br>
+                    <small class="text-muted">${s.domain}</small>
+                </div>
+                <span class="badge bg-success">Aktif</span>
+            </li>
+        `).join('');
+    };
+    
+    // --- EVENT HANDLER ---
+    
+    // 1. Update Konfigurasi
+    document.getElementById('configForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newConfig = {
+            DEPOSIT_API_KEY: formData.get('DEPOSIT_API_KEY'),
+            TOPUP_BONUS_PERCENT: parseInt(formData.get('TOPUP_BONUS_PERCENT')),
+            DEPOSIT_BASE_URL: currentConfig.DEPOSIT_BASE_URL,
+            USER_STARTING_BALANCE: currentConfig.USER_STARTING_BALANCE,
+            PRICES: {},
+            DEFAULT_CONFIG: currentConfig.DEFAULT_CONFIG
+        };
+
+        // Ambil data harga
+        for (const [key, value] of formData.entries()) {
+            if (key.startsWith('price_')) {
+                const type = key.replace('price_', '');
+                newConfig.PRICES[type] = parseInt(value);
+            }
+        }
+
+        try {
+            const response = await fetch('/admin/update-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                body: JSON.stringify(newConfig)
+            });
+            const result = await response.json();
+            if (response.ok && result.status) {
+                showAlert('Konfigurasi berhasil disimpan!', 'success');
+                fetchConfigAndServers(); // Muat ulang
+            } else {
+                showAlert(result.message || 'Gagal menyimpan konfigurasi.', 'danger');
+            }
+        } catch (error) {
+            showAlert('Gagal koneksi saat menyimpan konfigurasi.', 'danger');
+        }
+    });
+
+    // 2. Tambah Server
+    document.getElementById('addServerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const serverData = {
+            name: document.getElementById('serverName').value,
+            domain: document.getElementById('serverDomain').value,
+            auth_key: document.getElementById('serverAuthKey').value
+        };
+
+        try {
+            const response = await fetch('/admin/add-server', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                body: JSON.stringify(serverData)
+            });
+            const result = await response.json();
+
+            if (response.ok && result.status) {
+                showAlert('Server berhasil ditambahkan!', 'success');
+                document.getElementById('addServerForm').reset();
+                fetchConfigAndServers();
+            } else {
+                showAlert(result.message || 'Gagal menambahkan server.', 'danger');
+            }
+        } catch (error) {
+             showAlert('Gagal koneksi saat menambahkan server.', 'danger');
+        }
+    });
+
+    // 3. Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('authToken'); 
+        localStorage.removeItem('authRole');
+        window.location.href = '/auth.html';
+    });
+
+    // Initial Load
+    fetchConfigAndServers();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
