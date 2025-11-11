@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pengguna - Saldo & Akun</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">💰 Panel User</a>
+        <div class="d-flex">
+            <button class="btn btn-outline-light me-2" id="currentBalance">Saldo: Muat...</button>
+            <button class="btn btn-danger" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div id="mainAlert" class="alert d-none" role="alert"></div>
+
+    <!-- Pilihan Menu -->
+    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+      <li class="nav-item"><button class="nav-link active" id="pills-shop-tab" data-bs-toggle="pill" data-bs-target="#pills-shop" type="button">Beli Akun</button></li>
+      <li class="nav-item"><button class="nav-link" id="pills-deposit-tab" data-bs-toggle="pill" data-bs-target="#pills-deposit" type="button">Deposit Saldo</button></li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+        <!-- TAB 1: BELI AKUN -->
+        <div class="tab-pane fade show active" id="pills-shop" role="tabpanel">
+            <h4 class="mb-3">Pilih Akun & Server</h4>
+            <div id="purchaseFormContainer">
+                <!-- Form Pembelian akan di-generate oleh JS -->
+            </div>
+        </div>
+
+        <!-- TAB 2: DEPOSIT SALDO -->
+        <div class="tab-pane fade" id="pills-deposit" role="tabpanel">
+            <h4 class="mb-3">Deposit Saldo via QRIS</h4>
+            <div id="depositContainer" class="card p-3">
+                <div id="depositForm">
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Deposit (Min. Rp1000)</label>
+                        <input type="number" class="form-control" id="depositAmount" value="10000" min="1000" required>
+                    </div>
+                    <p class="text-info" id="bonusInfo">Bonus Top-up: 0%</p>
+                    <button class="btn btn-warning w-100" id="createQrisBtn">Buat Kode QRIS</button>
+                </div>
+
+                <div id="qrisDisplay" class="text-center mt-4 d-none">
+                    <p class="text-success">Scan QRIS ini untuk Pembayaran</p>
+                    <img id="qrisImage" class="img-fluid border p-2" alt="Kode QRIS" style="max-width: 250px;">
+                    <p class="mt-2">Total Bayar: <strong id="totalAmountQris"></strong></p>
+                    <p class="text-muted"><small>Kedaluwarsa pada: <span id="qrisExpired"></span></small></p>
+                    <button class="btn btn-primary w-100 mt-2" id="checkQrisBtn">Cek Status Pembayaran</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Detail Akun Sukses -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white"><h5 class="modal-title">✅ Akun Berhasil Dibuat/Diperpanjang</h5></div>
+                <div class="modal-body">
+                    <div id="accountDetailContent"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken || localStorage.getItem('authRole') !== 'user') { 
+        // FIX: Menggunakan replace() untuk mengatasi SyntaxError pada beberapa lingkungan
+        window.location.replace('/auth.html'); 
+    }
+
+    const mainAlert = document.getElementById('mainAlert');
+    const balanceBtn = document.getElementById('currentBalance');
+    let userConfig = {};
+    let currentUser = {};
+
+    const showAlert = (message, type) => {
+        mainAlert.textContent = message;
+        mainAlert.className = `alert alert-${type}`;
+        mainAlert.classList.remove('d-none');
+        setTimeout(() => mainAlert.classList.add('d-none'), 5000);
+    };
+
+    const fetchUserData = async () => {
+        try {
+            const response = await fetch('/user/data', { headers: { 'Authorization': `Bearer ${authToken}` } });
+            const result = await response.json();
+            if (response.ok && result.status) {
+                currentUser = result.user;
+                balanceBtn.textContent = `Saldo: Rp${currentUser.saldo.toLocaleString('id-ID')}`;
+                handleQrisState();
+            } else {
+                showAlert(result.message || 'Gagal memuat data pengguna.', 'danger');
+            }
+        } catch (error) {
+            showAlert('Kesalahan koneksi saat memuat data.', 'danger');
+        }
+    };
+
+    const fetchConfig = async () => {
+        try {
+            const response = await fetch('/api/config');
+            const result = await response.json();
+            if (response.ok && result.status) {
+                userConfig = result;
+                document.getElementById('bonusInfo').textContent = `Bonus Top-up: ${userConfig.config.TOPUP_BONUS_PERCENT || 0}%`;
+                renderShopForm();
+            }
+        } catch (error) {
+            showAlert('Gagal memuat konfigurasi sistem.', 'danger');
+        }
+    };
+
+    // --- TAMPILAN PEMBELIAN ---
+    const renderShopForm = () => {
+        const container = document.getElementById('purchaseFormContainer');
+        if (userConfig.servers.length === 0) {
+            container.innerHTML = '<div class="alert alert-warning">Belum ada server yang ditambahkan admin.</div>';
+            return;
+        }
+
+        let html = '';
+        const types = ['ssh', 'vmess', 'trojan', 'vless'];
+
+        types.forEach(type => {
+            const price = userConfig.config.PRICES[type];
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-capitalize">${type} - Rp${price.toLocaleString('id-ID')} / 30 Hari</h5>
+                        <form class="purchaseForm" data-type="${type}">
+                            <input type="hidden" name="endpoint_type" value="${type}">
+                            <div class="row g-2">
+                                <div class="col-md-6 mb-2">
+                                    <select class="form-select form-select-sm" name="server_id" required>
+                                        <option value="">Pilih Server</option>
+                                        ${userConfig.servers.map(s => `<option value="${s.id}">${s.name} (${s.domain})</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="text" class="form-control form-control-sm" name="user_vpn" placeholder="Username Akun" required>
+                                </div>
+                                ${type === 'ssh' ? 
+                                    `<div class="col-md-6 mb-2"><input type="password" class="form-control form-control-sm" name="password_vpn" placeholder="Password Akun" required></div>` :
+                                    `<div class="col-md-6 mb-2"><input type="number" class="form-control form-control-sm" name="quota" placeholder="Kuota GB" value="${userConfig.config.DEFAULT_CONFIG.quota}" required></div>`
+                                }
+                                <div class="col-md-6 mb-2"><input type="number" class="form-control form-control-sm" name="limitip" placeholder="Limit IP" value="${userConfig.config.DEFAULT_CONFIG.limitip}" required></div>
+                                <div class="col-md-6 mb-2"><input type="number" class="form-control form-control-sm" name="exp" placeholder="Masa Aktif Hari" value="${userConfig.config.DEFAULT_CONFIG.exp}" required></div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-success mt-2">Beli Sekarang</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        document.querySelectorAll('.purchaseForm').forEach(form => form.addEventListener('submit', handlePurchase));
+    };
+    
+    // --- PEMBELIAN AKUN LOGIC ---
+    const handlePurchase = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const type = form.getAttribute('data-type');
+        const price = userConfig.config.PRICES[type];
+
+        if (currentUser.saldo < price) {
+            return showAlert(`Saldo tidak cukup! Harga Rp${price.toLocaleString('id-ID')}`, 'danger');
+        }
+
+        if (!confirm(`Yakin ingin membeli ${type.toUpperCase()} seharga Rp${price.toLocaleString('id-ID')}?`)) return;
+
+        const formData = {
+            server_id: form.elements.server_id.value,
+            endpoint_type: type,
+            user_vpn: form.elements.user_vpn.value,
+            exp: form.elements.exp.value,
+            limitip: form.elements.limitip.value,
+            ...(type === 'ssh' ? { password_vpn: form.elements.password_vpn.value } : { quota: form.elements.quota.value })
+        };
+
+        try {
+            const response = await fetch('/user/purchase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+
+            if (response.ok && result.status) {
+                showAlert(`Pembelian ${type.toUpperCase()} Berhasil!`, 'success');
+                fetchUserData(); // Muat ulang saldo
+                displayAccountDetails(result.data, type);
+            } else {
+                showAlert(result.message || 'Pembelian gagal.', 'danger');
+            }
+        } catch (error) {
+            showAlert('Gagal koneksi saat pembelian.', 'danger');
+        }
+    };
+    
+    // --- TAMPILAN DETAIL AKUN ---
+    const displayAccountDetails = (data, type) => {
+        const modalBody = document.getElementById('accountDetailContent');
+        
+        let html = `<div class="card p-3 bg-light"><table class="table table-sm table-borderless"><tbody>`;
+        
+        // Data Universal
+        html += `<tr><th>Tipe Akun</th><td>: <span class="badge bg-primary">${type.toUpperCase()}</span></td></tr>`;
+        html += `<tr><th>Username</th><td>: <strong>${data.user || data.username || 'N/A'}</strong></td></tr>`;
+        html += `<tr><th>Password</th><td>: <strong>${data.password || 'N/A'}</strong></td></tr>`;
+        html += `<tr><th>Expired</th><td>: <span class="badge bg-warning text-dark">${data.expired || data.exp_date || 'N/A'}</span></td></tr>`;
+        
+        if (type === 'ssh') {
+            html += `<tr><th>Host / IP</th><td>: ${data.host || data.ip || 'N/A'}</td></tr>`;
+            if (data.ports) {
+                html += `<tr><th>Ports SSH/WS</th><td>: ${data.ports.openSSH}, ${data.ports.sshWS}, ${data.ports.sshWSSSL}</td></tr>`;
+            }
+            if (data.saveLink) {
+                html += `<tr><td colspan="2"><a href="${data.saveLink}" target="_blank" class="btn btn-sm btn-info w-100 mt-2">Download Config SSH</a></td></tr>`;
+            }
+        } else {
+            html += `<tr><th>UUID</th><td>: <span class="text-break">${data.uuid || 'N/A'}</span></td></tr>`;
+            html += `<tr><th>Domain</th><td>: ${data.domain || 'N/A'}</td></tr>`;
+            if (data.ws_tls) {
+                html += `<tr><td colspan="2"><button class="btn btn-sm btn-success w-100 mt-2" onclick="navigator.clipboard.writeText('${data.ws_tls}')">Copy VMess WS-TLS Link</button></td></tr>`;
+                html += `<tr><td colspan="2"><button class="btn btn-sm btn-secondary w-100 mt-1" onclick="navigator.clipboard.writeText('${data.openclash}')">Copy OpenClash Link</button></td></tr>`;
+            }
+        }
+
+        html += `</tbody></table></div>`;
+        modalBody.innerHTML = html;
+        new bootstrap.Modal(document.getElementById('successModal')).show();
+    };
+
+    // --- LOGIKA DEPOSIT ---
+    const handleQrisState = () => {
+        const container = document.getElementById('depositContainer');
+        const form = document.getElementById('depositForm');
+        const display = document.getElementById('qrisDisplay');
+
+        if (currentUser.current_qris_trx_id) {
+            // Tampilkan QRIS yang sudah ada
+            form.classList.add('d-none');
+            display.classList.remove('d-none');
+            document.getElementById('checkQrisBtn').setAttribute('data-trxd', currentUser.current_qris_trx_id);
+            document.getElementById('totalAmountQris').textContent = "Rp? (Cek Status)";
+        } else {
+            // Tampilkan form buat QRIS
+            form.classList.remove('d-none');
+            display.classList.add('d-none');
+        }
+    };
+    
+    // Buat QRIS
+    document.getElementById('createQrisBtn').addEventListener('click', async () => {
+        const amount = document.getElementById('depositAmount').value;
+        if (amount < 1000) return showAlert('Minimal deposit Rp1000', 'warning');
+
+        try {
+            const response = await fetch('/user/deposit/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                body: JSON.stringify({ amount: parseInt(amount) })
+            });
+            const result = await response.json();
+
+            if (response.ok && result.status) {
+                showAlert('QRIS dibuat. Lanjut pembayaran.', 'success');
+                document.getElementById('qrisImage').src = result.data.qris_url;
+                document.getElementById('totalAmountQris').textContent = `Rp${result.data.total_amount.toLocaleString('id-ID')} (Bonus: Rp${result.data.bonus_amount})`;
+                document.getElementById('qrisExpired').textContent = new Date(result.data.expired_at).toLocaleString('id-ID');
+                
+                // Update state
+                currentUser.current_qris_trx_id = result.data.transaction_id;
+                handleQrisState();
+            } else {
+                showAlert(result.message || 'Gagal membuat QRIS.', 'danger');
+            }
+        } catch (error) {
+            showAlert('Gagal koneksi saat membuat QRIS.', 'danger');
+        }
+    });
+    
+    // Cek QRIS Status
+    document.getElementById('checkQrisBtn').addEventListener('click', async (e) => {
+        const trxId = currentUser.current_qris_trx_id;
+        e.target.textContent = 'Mengecek...';
+        e.target.disabled = true;
+
+        try {
+            const response = await fetch(`/user/deposit/check/${trxId}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+            const result = await response.json();
+
+            if (result.status === 'paid') {
+                showAlert(result.message, 'success');
+                fetchUserData(); // Muat ulang data untuk update saldo
+                // Reset tampilan Qris
+                currentUser.current_qris_trx_id = null;
+                handleQrisState();
+            } else if (result.status === 'pending') {
+                showAlert(result.message, 'warning');
+            } else {
+                showAlert(result.message, 'danger');
+                fetchUserData(); // Muat ulang data untuk reset Qris ID
+            }
+        } catch (error) {
+            showAlert('Gagal cek status.', 'danger');
+        } finally {
+            e.target.textContent = 'Cek Status Pembayaran';
+            e.target.disabled = false;
+        }
+    });
+
+    // --- Logout ---
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('authToken'); 
+        localStorage.removeItem('authRole');
+        // FIX: Menggunakan replace() untuk mengatasi SyntaxError pada beberapa lingkungan
+        window.location.replace('/auth.html');
+    });
+    
+    // Initial Load
+    fetchUserData();
+    fetchConfig();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
